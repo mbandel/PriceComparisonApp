@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">Price Comparison</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Price Comparison</string>
+    <string name="nav_header_subtitle">Aplikacja do porównywania cen</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="api_url">http://localhost:8080/api</string>
+    <string name="api_auth">authenticate</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+    <string name="home_second">Home Second</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="email">Email</string>
+    <string name="password">Hasło</string>
+    <string name="login">Zaloguj się</string>
+    <string name="register">Załóż konto</string>
+    <string name="login_bold"><b>Zaloguj się</b></string>
+    <string name="register_bold"><b>Załóż konto</b></string>
+    <string name="first_name">Imię</string>
+    <string name="last_name">Nazwisko</string>
+    <string name="username">Nazwa użytkownika</string>
+    <string name="confirm_password">Potwierdź hasło</string>
+    <string name="email_error">Niepoprawny adres email</string>
+    <string name="password_error">Hasło powinno zawierać co najmniej 6 znaków, w tym małą i dużą literę oraz cyfrę</string>
+    <string name="password_error2">Hasła nie są identyczne</string>
+    <string name="first_name_error">Imię powinno mieć 2–30 znaków, wyłącznie litery</string>
+    <string name="last_name_error">Nazwisko powinno mieć 2–30 znaków, wyłącznie litery</string>
+    <string name="username_error">Nazwa użytkownika powinna mieć 3–30 znaków</string>
+    <string name="server_error">Błąd połączenia z serwerem</string>
+
+</resources>
