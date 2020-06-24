@@ -11,7 +11,9 @@ import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
 import com.pc.R;
+import com.pc.adapter.CategoryAdapter;
 import com.pc.model.Category;
+import com.pc.model.Product;
 import com.pc.retrofit.Connector;
 
 import androidx.annotation.NonNull;
@@ -20,6 +22,9 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
@@ -31,13 +36,16 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawer;
+    @BindView(R.id.list_of_categories)
+    RecyclerView recyclerView;
+
     private AppBarConfiguration mAppBarConfiguration;
-    @BindView(R.id.drawer_layout) DrawerLayout drawer;
 
     private Connector connector;
     private SharedPreferences sharedPreferences;
-   // @BindView(R.id.nav_view) NavigationView navigationView;
-   // @BindView(R.id.toolbar) Toolbar toolbar;
+    private String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,27 +64,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         sharedPreferences = getSharedPreferences("myPreferences", Context.MODE_PRIVATE);
         connector = Connector.getInstance();
+        token = sharedPreferences.getString("token", null);
 
-        String token = sharedPreferences.getString("token", null);
-        Call<List<Category>> categoriesCall = connector.serverApi.getCategories("Bearer "+ token);
-        categoriesCall.enqueue(new Callback<List<Category>>() {
-            @Override
-            public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
-                if(response.isSuccessful()) {
-                    List<Category> categories = response.body();
-                    System.out.println("categories size: "+ categories.size());
-                    Toast.makeText(getApplicationContext(), "sukces", Toast.LENGTH_SHORT).show();
-                }
-                else
-                    Toast.makeText(getApplicationContext(), "code "+response.code(), Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFailure(Call<List<Category>> call, Throwable t) {
-                System.out.println("response null");
-
-            }
-        });
+        getCategories();
 
     }
 
@@ -96,5 +86,81 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
         return true;
+    }
+
+    public void getCategories(){
+        Call<List<Category>> categoriesCall = connector.serverApi.getCategories(token);
+        categoriesCall.enqueue(new Callback<List<Category>>() {
+            @Override
+            public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
+                if(response.isSuccessful()) {
+                    List<Category> categories = response.body();
+                    System.out.println("categories size: "+ categories.size());
+                    Toast.makeText(getApplicationContext(), "sukces", Toast.LENGTH_SHORT).show();
+                    showCategoriesList(categories);
+                }
+                else
+                    Toast.makeText(getApplicationContext(), "code "+response.code(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<List<Category>> call, Throwable t) {
+                System.out.println("response null");
+
+            }
+        });
+    }
+
+    public void getProductsByCategoryId(int id){
+        Call<List<Product>> productsCall = connector.serverApi.getProductsByCategoryId(token, id);
+        productsCall.enqueue(new Callback<List<Product>>() {
+            @Override
+            public void onResponse(Call<List<Product>> call, Response<List<Product>> response) {
+                if(response.isSuccessful()){
+                    Toast.makeText(getApplicationContext(), "sukces", Toast.LENGTH_SHORT).show();
+                    List<Product> products = response.body();
+                    for (Product product: products){
+                        System.out.println(product);
+                    }
+                }else {
+                    Toast.makeText(getApplicationContext(), "porazka", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Product>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void showCategoriesList(List<Category> list){
+        CategoryAdapter categoryAdapter = new CategoryAdapter(this, list);
+        recyclerView.setAdapter(categoryAdapter);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+    }
+
+    public int setIcon(String iconType){
+        if (iconType.equals("słodycze"))
+            return R.drawable.ic_candy;
+        else if (iconType.equals("pieczywo"))
+            return R.drawable.ic_bread;
+        else if (iconType.equals("napoje"))
+            return R.drawable.ic_drinks;
+        else if (iconType.equals("warzywa"))
+            return R.drawable.ic_vegetable;
+        else if (iconType.equals("owoce"))
+            return R.drawable.ic_fruit;
+        else if (iconType.equals("przyprawy"))
+            return R.drawable.spices;
+        else if (iconType.equals("alkohole"))
+            return R.drawable.ic_alcohol;
+        else if (iconType.equals("nabiał"))
+            return R.drawable.ic_milk;
+        else if (iconType.equals("meat"))
+            return R.drawable.ic_meat;
+        else if (iconType.equals("ryby"))
+            return R.drawable.ic_fish;
+        else return R.drawable.border_bg;
     }
 }

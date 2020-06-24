@@ -133,7 +133,7 @@ public class LoginFragment extends Fragment implements Validator.ValidationListe
                         jsonObject = new JSONObject(
                                 Objects.requireNonNull(response.body()).string());
                        String token = jsonObject.getString("token");
-                       sharedPreferences.edit().putString("token", token).commit();
+                       sharedPreferences.edit().putString("token", "Bearer " + token).commit();
                        getActivity().runOnUiThread(() -> {
                         });
 
