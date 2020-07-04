@@ -1,6 +1,7 @@
 package com.pc.adapter;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pc.R;
+import com.pc.activity.ProductActivity;
 import com.pc.model.Category;
 
 import java.util.List;
@@ -17,6 +19,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.annotations.NonNull;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder> {
 
@@ -45,7 +49,9 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println("id " + category.getId() + "name: "+  category.getName());
+                Intent intent = new Intent(activity.getApplicationContext(), ProductActivity.class);
+                intent.putExtra("id", category.getId());
+                activity.startActivity(intent);
             }
         });
     }

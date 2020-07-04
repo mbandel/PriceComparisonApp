@@ -1,6 +1,7 @@
 package com.pc.retrofit;
 
 import com.pc.model.Category;
+import com.pc.model.Poster;
 import com.pc.model.Product;
 import com.pc.model.User;
 
@@ -27,6 +28,9 @@ public interface ServerApi {
 
     @GET("products/category/{id}")
     public Call<List<Product>> getProductsByCategoryId(@Header("Authorization") String token, @Path("id") int id);
+
+    @GET("posters/product/{id}")
+    public Call<List<Poster>> getPostersByProductId(@Header("Authorization") String token, @Path("id") int id);
 
     @POST("register")
     public Call<String> createUser(@Body User user);

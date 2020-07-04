@@ -99,6 +99,7 @@ public class LoginFragment extends Fragment implements Validator.ValidationListe
 
     @OnClick(R.id.login_btn)
     public void onLoginButtonClick(){
+        loginButton.setEnabled(false);
         validator.validate();
         progressLayout.setVisibility(View.VISIBLE);
 
@@ -122,6 +123,7 @@ public class LoginFragment extends Fragment implements Validator.ValidationListe
                 getActivity().runOnUiThread(() -> {
                     System.out.println("blad" + e.toString());
                     Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_LONG).show();
+                    progressLayout.setVisibility(View.INVISIBLE);
                 });
             }
 
@@ -144,6 +146,7 @@ public class LoginFragment extends Fragment implements Validator.ValidationListe
                 } else {
                     getActivity().runOnUiThread(() -> {
                         Toast.makeText(getActivity().getApplicationContext(), "Niepoprawny email lub haslo", Toast.LENGTH_LONG).show();
+                        progressLayout.setVisibility(View.INVISIBLE);
                     });
                 }
             }
@@ -161,6 +164,7 @@ public class LoginFragment extends Fragment implements Validator.ValidationListe
     @Override
     public void onValidationFailed(List<ValidationError> errors) {
         isInputValid = false;
+        loginButton.setEnabled(true);
         for (ValidationError error : errors){
             View view = error.getView();
             if (view == email){

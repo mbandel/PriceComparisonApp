@@ -32,5 +32,7 @@
     <string name="last_name_error">Nazwisko powinno mieć 2–30 znaków, wyłącznie litery</string>
     <string name="username_error">Nazwa użytkownika powinna mieć 3–30 znaków</string>
     <string name="server_error">Błąd połączenia z serwerem</string>
+    <string name="list">Lista</string>
+    <string name="map">Mapa</string>
 
 </resources>

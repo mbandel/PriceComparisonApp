@@ -1,6 +1,8 @@
 package com.pc.fragment;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +34,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class RegisterFragment extends Fragment implements Validator.ValidationListener {
+public class RegisterFragment extends Fragment implements Validator.ValidationListener, TextWatcher {
 
     @BindView(R.id.register_btn)
     Button registerButton;
@@ -51,8 +53,8 @@ public class RegisterFragment extends Fragment implements Validator.ValidationLi
     @BindView(R.id.last_name_input)
     EditText lastName;
 
-    @Length(min = 2, max = 30)
-    @Pattern(regex = "[a-z]+")
+    @Length(min = 2, max = 20)
+    @Pattern(regex = "^[a-zA-Z0-9]+$")
     @BindView(R.id.username_input)
     EditText username;
 
@@ -93,6 +95,13 @@ public class RegisterFragment extends Fragment implements Validator.ValidationLi
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_register, container, false);
         ButterKnife.bind(this, view);
+        firstName.addTextChangedListener(this);
+        lastName.addTextChangedListener(this);
+        email.addTextChangedListener(this);
+        username.addTextChangedListener(this);
+        password.addTextChangedListener(this);
+        confirmPassword.addTextChangedListener(this);
+
         return view;
     }
 
@@ -112,12 +121,15 @@ public class RegisterFragment extends Fragment implements Validator.ValidationLi
                         System.out.println("response code " + response.code());
                         getActivity().runOnUiThread(() -> {
                             Toast.makeText(getActivity().getApplicationContext(), "rejestracja zakończona sukcesem", Toast.LENGTH_SHORT).show();
+                            progressLayout.setVisibility(View.INVISIBLE);
+
                         });
                     }else{
                         System.out.println(response.body());
                         System.out.println("response code " + response.code());
                         getActivity().runOnUiThread(() -> {
                             Toast.makeText(getActivity().getApplicationContext(), "rejestracja zakończona niepowodzeniem", Toast.LENGTH_SHORT).show();
+                            progressLayout.setVisibility(View.INVISIBLE);
                         });
                     }
                 }
@@ -157,5 +169,17 @@ public class RegisterFragment extends Fragment implements Validator.ValidationLi
 
             else ((EditText) view).setError(null);
         }
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+    @Override
+    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+    }
+
+    @Override
+    public void afterTextChanged(Editable editable) {
+        validator.validate();
     }
 }

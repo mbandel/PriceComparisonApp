@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_home"
+    tools:ignore="UnusedNavigation">
+
+    <fragment
+        android:id="@+id/navigation_list"
+        android:name="com.pc.fragment.PosterFragment"
+        android:label="Lista"
+        tools:layout="@layout/fragment_poster" />
+
+    <fragment
+        android:id="@+id/navigation_map"
+        android:name="com.pc.fragment.PosterFragment"
+        android:label="Mapa"
+        tools:layout="@layout/fragment_poster" />
+
+
+</navigation>
