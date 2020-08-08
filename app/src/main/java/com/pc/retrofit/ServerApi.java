@@ -1,8 +1,11 @@
 package com.pc.retrofit;
 
 import com.pc.model.Category;
+import com.pc.model.Comment;
+import com.pc.model.Credentials;
 import com.pc.model.Poster;
 import com.pc.model.Product;
+import com.pc.model.Token;
 import com.pc.model.User;
 
 import java.util.List;
@@ -16,9 +19,8 @@ import retrofit2.http.Path;
 
 public interface ServerApi {
 
-
-    @GET("user/email/{email")
-    public Call<User> findUserByEmail(@Path("email") String email);
+    @GET("user/email/{email}")
+    public Call<User> findUserByEmail(@Header("Authorization") String token, @Path("email") String email);
 
     @GET("user/username{username}")
     public Call<User> findUserByUsername(@Path("username") String username);
@@ -32,8 +34,19 @@ public interface ServerApi {
     @GET("posters/product/{id}")
     public Call<List<Poster>> getPostersByProductId(@Header("Authorization") String token, @Path("id") int id);
 
+    @GET("poster/{id}")
+    public Call<Poster> getPosterById(@Header("Authorization") String token, @Path("id") int id);
+
+    @GET("poster/comments/{id}")
+    public Call<List<Comment>> getCommentsByPosterId(@Header("Authorization") String token, @Path("id") int id);
+
+    @POST("authenticate")
+    public Call<Token> authenticate(@Body Credentials credentials);
+
+    @POST("comment")
+    public Call<String> addComment(@Header("Authorization") String token, @Body Comment comment);
+
     @POST("register")
     public Call<String> createUser(@Body User user);
-
 
 }

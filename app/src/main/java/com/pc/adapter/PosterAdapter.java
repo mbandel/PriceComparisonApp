@@ -1,6 +1,8 @@
 package com.pc.adapter;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +13,10 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.pc.R;
+import com.pc.activity.PosterDetailsActivity;
 import com.pc.model.Poster;
+
+import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -41,8 +46,21 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Poster poster = posters.get(position);
-        holder.price.setText(poster.getPrice() + "zł");
+        holder.price.setText(String.format("%.2f", poster.getPrice()) + " zł");
         holder.shop.setText(poster.getStore().getName());
+        if (poster.getRatingValue() > 0)
+            holder.rating.setTextColor(activity.getColor(R.color.colorGreen));
+        else if (poster.getRatingValue() < 0)
+            holder.rating.setTextColor(activity.getColor(R.color.colorRed));
+        holder.rating.setText(String.valueOf(poster.getRatingValue()));
+        holder.moreInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(activity.getApplicationContext(), PosterDetailsActivity.class);
+                intent.putExtra("id", poster.getId());
+                activity.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -55,14 +73,13 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.ViewHolder
         TextView price;
         @BindView(R.id.shop)
         TextView shop;
-        @BindView(R.id.like)
-        ImageView like;
-        @BindView(R.id.dislike)
-        ImageView dislike;
+
         @BindView(R.id.more_info)
         ImageView moreInfo;
+        @BindView(R.id.rating)
+        TextView rating;
 
-        public ViewHolder(@NonNull android.view.View itemView){
+        public ViewHolder(@NonNull View itemView){
             super(itemView);
             ButterKnife.bind(this, itemView);
         }

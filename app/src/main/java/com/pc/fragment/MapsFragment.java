@@ -6,6 +6,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -29,7 +30,9 @@ import com.androidmapsextensions.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 
+import com.google.android.material.button.MaterialButton;
 import com.pc.R;
+import com.pc.activity.PosterDetailsActivity;
 import com.pc.model.Poster;
 import com.pc.model.Store;
 
@@ -56,6 +59,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
     TextView price;
     @BindView(R.id.rating_value)
     TextView rating;
+    @BindView(R.id.progress_layout)
+    ConstraintLayout progressLayout;
+    @BindView(R.id.select_btn)
+    MaterialButton selectButton;
 
    private List<Poster> posters;
 
@@ -94,13 +101,21 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
                     markerInfo.setVisibility(View.VISIBLE);
                     storeName.setText(poster.getStore().getName());
                     storeAddress.setText(poster.getStore().getAddress());
-                    price.setText(poster.getPrice().toString() + " zł");
-                    rating.setText(0+"");
+                    price.setText(String.format("%.2f", poster.getPrice()) + " zł");
+                    rating.setText(String.valueOf(poster.getRatingValue()));
+                    selectButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(getActivity().getApplicationContext(), PosterDetailsActivity.class);
+                            intent.putExtra("id", poster.getId());
+                            getActivity().startActivity(intent);
+                        }
+                    });
                 }
                 return false;
             }
         });
-
+        progressLayout.setVisibility(View.INVISIBLE);
     }
 
     @OnClick(R.id.info_close)
@@ -131,6 +146,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        progressLayout.setVisibility(View.VISIBLE);
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {

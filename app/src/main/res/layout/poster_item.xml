@@ -43,21 +43,21 @@
             />
 
 
-        <ImageView
-            android:id="@+id/dislike"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight=".1"
-            android:src="@drawable/ic_dislike"
-            />
+<!--        <ImageView-->
+<!--            android:id="@+id/dislike"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight=".1"-->
+<!--            android:src="@drawable/ic_dislike"-->
+<!--            />-->
 
-        <ImageView
-            android:id="@+id/like"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_like"
-            android:layout_weight=".1"
-            />
+<!--        <ImageView-->
+<!--            android:id="@+id/like"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:src="@drawable/ic_like"-->
+<!--            android:layout_weight=".1"-->
+<!--            />-->
 
         <TextView
             android:id="@+id/rating"

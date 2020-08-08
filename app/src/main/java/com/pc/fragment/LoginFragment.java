@@ -24,6 +24,9 @@ import com.mobsandgeeks.saripaar.annotation.Email;
 import com.mobsandgeeks.saripaar.annotation.Password;
 import com.pc.R;
 import com.pc.activity.MainActivity;
+import com.pc.model.Credentials;
+import com.pc.model.Token;
+import com.pc.model.User;
 import com.pc.retrofit.Config;
 import com.pc.retrofit.Connector;
 
@@ -39,13 +42,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cz.msebera.android.httpclient.HttpStatus;
-import okhttp3.Call;
-import okhttp3.Callback;
+import retrofit2.Call;
+import retrofit2.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+
 import okhttp3.RequestBody;
-import okhttp3.Response;
+import retrofit2.Response;
 
 public class LoginFragment extends Fragment implements Validator.ValidationListener, TextWatcher {
 
@@ -103,57 +107,43 @@ public class LoginFragment extends Fragment implements Validator.ValidationListe
         validator.validate();
         progressLayout.setVisibility(View.VISIBLE);
 
-        String requestUrl = Config.URL + getResources().getString(R.string.api_auth);
-        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-        try {
-            jsonObject
-                    .put("email", Objects.requireNonNull(email.getText()).toString())
-                    .put("password", Objects.requireNonNull(password.getText()).toString());
-        } catch (JSONException ignored) {}
-
-        RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
-        Request loginRequest = new Request.Builder()
-                .url(requestUrl)
-                .post(body)
-                .build();
-
-        httpClient.newCall(loginRequest).enqueue(new Callback() {
+        Credentials credentials = new Credentials(email.getText().toString(), password.getText().toString());
+        Call<Token> authCall = connector.serverApi.authenticate(credentials);
+        authCall.enqueue(new Callback<Token>() {
             @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                getActivity().runOnUiThread(() -> {
-                    System.out.println("blad" + e.toString());
-                    Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_LONG).show();
+            public void onResponse(Call<Token> call, Response<Token> response) {
+                if(response.isSuccessful()){
+                    sharedPreferences.edit().putString("token", "Bearer " + response.body().getToken()).commit();
+                    findUserByEmail(sharedPreferences.getString("token", null), email.getText().toString());
+                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                    startActivity(intent);
                     progressLayout.setVisibility(View.INVISIBLE);
-                });
+                }
             }
 
             @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response)
-                    throws IOException  {
-                if(response.code() == HttpStatus.SC_OK) {
-                    try {
-                        jsonObject = new JSONObject(
-                                Objects.requireNonNull(response.body()).string());
-                       String token = jsonObject.getString("token");
-                       sharedPreferences.edit().putString("token", "Bearer " + token).commit();
-                       getActivity().runOnUiThread(() -> {
-                        });
-
-                       Intent intent = new Intent(getActivity(), MainActivity.class);
-                       startActivity(intent);
-                        progressLayout.setVisibility(View.INVISIBLE);
-                    } catch (JSONException ignored) {}
-                } else {
-                    getActivity().runOnUiThread(() -> {
-                        Toast.makeText(getActivity().getApplicationContext(), "Niepoprawny email lub haslo", Toast.LENGTH_LONG).show();
-                        progressLayout.setVisibility(View.INVISIBLE);
-                    });
-                }
+            public void onFailure(Call<Token> call, Throwable t) {
+                Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_LONG).show();
+                progressLayout.setVisibility(View.INVISIBLE);
             }
         });
 
-        //Intent intent = new Intent(getActivity(), MainActivity.class);
-        //startActivity(intent);
+    }
+
+    public void findUserByEmail(String token, String email){
+        Call<User> findUserCall = connector.serverApi.findUserByEmail(token, email);
+        findUserCall.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, retrofit2.Response<User> response) {
+                if(response.isSuccessful()) {
+                    sharedPreferences.edit().putInt("id", response.body().getId()).commit();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+            }
+        });
     }
 
     @Override

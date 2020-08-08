@@ -34,5 +34,6 @@
     <string name="server_error">Błąd połączenia z serwerem</string>
     <string name="list">Lista</string>
     <string name="map">Mapa</string>
+    <string name="send">Wyślij</string>
 
 </resources>

@@ -8,6 +8,11 @@ public class Poster {
     private String date;
     private User user;
     private Store store;
+    private int ratingValue;
+
+    public Poster(int id){
+        this.id = id;
+    }
 
     public int getId() {
         return id;
@@ -29,9 +34,9 @@ public class Poster {
         return user;
     }
 
-    public Store getStore() {
-        return store;
-    }
+    public Store getStore() { return store; }
+
+    public int getRatingValue(){return ratingValue;}
 
     public Poster (int id, Product product, Double price, String date, User user, Store store){
         this.id = id;
