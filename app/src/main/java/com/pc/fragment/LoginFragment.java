@@ -105,29 +105,30 @@ public class LoginFragment extends Fragment implements Validator.ValidationListe
     public void onLoginButtonClick(){
         loginButton.setEnabled(false);
         validator.validate();
-        progressLayout.setVisibility(View.VISIBLE);
+        if (isInputValid) {
+            progressLayout.setVisibility(View.VISIBLE);
 
-        Credentials credentials = new Credentials(email.getText().toString(), password.getText().toString());
-        Call<Token> authCall = connector.serverApi.authenticate(credentials);
-        authCall.enqueue(new Callback<Token>() {
-            @Override
-            public void onResponse(Call<Token> call, Response<Token> response) {
-                if(response.isSuccessful()){
-                    sharedPreferences.edit().putString("token", "Bearer " + response.body().getToken()).commit();
-                    findUserByEmail(sharedPreferences.getString("token", null), email.getText().toString());
-                    Intent intent = new Intent(getActivity(), MainActivity.class);
-                    startActivity(intent);
+            Credentials credentials = new Credentials(email.getText().toString(), password.getText().toString());
+            Call<Token> authCall = connector.serverApi.authenticate(credentials);
+            authCall.enqueue(new Callback<Token>() {
+                @Override
+                public void onResponse(Call<Token> call, Response<Token> response) {
+                    if (response.isSuccessful()) {
+                        sharedPreferences.edit().putString("token", "Bearer " + response.body().getToken()).commit();
+                        findUserByEmail(sharedPreferences.getString("token", null), email.getText().toString());
+                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                        startActivity(intent);
+                        progressLayout.setVisibility(View.INVISIBLE);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Token> call, Throwable t) {
+                    Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_LONG).show();
                     progressLayout.setVisibility(View.INVISIBLE);
                 }
-            }
-
-            @Override
-            public void onFailure(Call<Token> call, Throwable t) {
-                Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_LONG).show();
-                progressLayout.setVisibility(View.INVISIBLE);
-            }
-        });
-
+            });
+        }
     }
 
     public void findUserByEmail(String token, String email){

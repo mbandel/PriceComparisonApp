@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
@@ -113,9 +115,9 @@ public class AddPosterActivity extends AppCompatActivity implements NavigationAd
             @Override
             public void onResponse(Call call, Response response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(getApplicationContext(), "Dodano ogłoszemoe", Toast.LENGTH_SHORT).show();
+                    showDialog(getString(R.string.poster_added));
                 } else {
-                    Toast.makeText(getApplicationContext(), "Ogłoszenie już istnieje", Toast.LENGTH_SHORT).show();
+                    showDialog(getString(R.string.poster_exist));
                 }
             }
 
@@ -137,6 +139,7 @@ public class AddPosterActivity extends AppCompatActivity implements NavigationAd
                     productPriceFragment = new ProductPriceFragment(products, poster);
                     goToProduct();
                 }
+                System.out.println("Response Code: " + response.code());
             }
             @Override
             public void onFailure(Call<List<Product>> call, Throwable t) {
@@ -155,13 +158,28 @@ public class AddPosterActivity extends AppCompatActivity implements NavigationAd
                     storeFragment = new StoreFragment(stores, poster);
                     storeMapFragment = new StoreMapFragment(stores, poster);
                 }
+                System.out.println("Response Code: " + response.code());
             }
 
             @Override
             public void onFailure(Call<List<Store>> call, Throwable t) {
-
             }
         });
+    }
+
+    public void showDialog(String title) {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.popup_dialog);
+        TextView titleTV = dialog.findViewById(R.id.title);
+        titleTV.setText(title);
+
+        MaterialButton back_button = dialog.findViewById(R.id.back_btn);
+        back_button.setOnClickListener(view -> {
+            dialog.dismiss();
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+
+        });
+        dialog.show();
     }
 
 
