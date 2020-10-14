@@ -35,5 +35,25 @@
     <string name="list">Lista</string>
     <string name="map">Mapa</string>
     <string name="send">Wyślij</string>
+    <string name="sort">Sortuj</string>
+    <string name="sort_rating">Najlepsza opinia </string>
+    <string name="sort_price">Najlepsza cena</string>
+    <string name="exit">Wyjdź</string>
+    <string name="choose_store">Wybierz sklep</string>
+    <string name="choose">Wybierz</string>
+    <string name="choose_product">Wybierz produkt</string>
+    <string name="add_poster">Dodaj ogłoszenie</string>
+    <string name="next">Dalej</string>
+    <string name="back">Cofnij</string>
+    <string name="confirm">Potwierdź</string>
+    <string name="summary">Podsumowanie</string>
+    <string name="store">Sklep</string>
+    <string name="price">Cena</string>
+    <string name="address">Adres</string>
+    <string name="rating">Opinia</string>
+    <string name="menu_list">Szukaj ogłoszenia</string>
+    <string name="menu_add">Dodaj ogłoszenie</string>
+    <string name="menu_promotions">Promocje</string>
+    <string name="product">Produkt</string>
 
 </resources>

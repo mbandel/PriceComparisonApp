@@ -85,9 +85,8 @@
                     android:layout_width="0dp"
                     android:layout_weight="0.7"
                     android:layout_height="wrap_content"
-                    android:text="2.00 zł"
+                    android:text=""
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-
                     app:layout_constraintStart_toEndOf="@+id/price" />
 
             </LinearLayout>
@@ -103,7 +102,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.3"
-                android:text="Sklep"
+                android:text="@string/store"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 />
 
@@ -112,7 +111,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="0.7"
                 android:layout_height="wrap_content"
-                android:text="Biedronka"
+                android:text=""
                 app:layout_constraintEnd_toEndOf="@+id/guideline_vertical"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 />
@@ -130,7 +129,7 @@
             android:layout_width="0dp"
             android:layout_weight="0.3"
             android:layout_height="wrap_content"
-            android:text="Adres"
+            android:text="@string/address"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             />
 
@@ -157,7 +156,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="0.3"
                 android:layout_height="wrap_content"
-                android:text="Ocena"
+                android:text="@string/rating"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 app:layout_constraintTop_toBottomOf="@+id/store_address"
                 />

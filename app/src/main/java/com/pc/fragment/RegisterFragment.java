@@ -122,7 +122,6 @@ public class RegisterFragment extends Fragment implements Validator.ValidationLi
                         getActivity().runOnUiThread(() -> {
                             Toast.makeText(getActivity().getApplicationContext(), "rejestracja zakończona sukcesem", Toast.LENGTH_SHORT).show();
                             progressLayout.setVisibility(View.INVISIBLE);
-
                         });
                     }else{
                         System.out.println(response.body());

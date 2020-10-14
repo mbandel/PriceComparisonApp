@@ -32,7 +32,4 @@ public class LoginRegisterActivity extends AppCompatActivity {
         tabs.setupWithViewPager(viewPager);
 
     }
-
-
-
 }

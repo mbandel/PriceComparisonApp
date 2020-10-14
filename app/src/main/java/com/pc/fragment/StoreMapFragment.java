@@ -6,6 +6,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -35,6 +36,7 @@ import com.pc.R;
 import com.pc.activity.PosterDetailsActivity;
 import com.pc.model.Poster;
 import com.pc.model.Store;
+import com.pc.util.NavigationAddPoster;
 
 import org.w3c.dom.Text;
 
@@ -45,7 +47,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MapsFragment extends Fragment implements OnMapReadyCallback{
+public class StoreMapFragment extends Fragment implements OnMapReadyCallback{
 
     @BindView(R.id.info_close)
     ImageView infoClose;
@@ -55,38 +57,42 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
     TextView storeAddress;
     @BindView(R.id.store_name_value)
     TextView storeName;
-    @BindView(R.id.price_value)
-    TextView price;
-    @BindView(R.id.rating_value)
-    TextView rating;
     @BindView(R.id.progress_layout)
     ConstraintLayout progressLayout;
     @BindView(R.id.select_btn)
     MaterialButton selectButton;
 
-   private List<Poster> posters;
+    private List<Store> stores;
+    private Poster poster;
+    private NavigationAddPoster navigation;
 
-    public static MapsFragment newInstance(List<Poster> posters){
-        MapsFragment mapsFragment = new MapsFragment();
-        mapsFragment.posters = posters;
-        return mapsFragment;
+    public StoreMapFragment(List<Store> stores, Poster poster){
+        this.stores = stores;
+        this.poster = poster;
     }
 
-    private MapsFragment(){ }
-
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof NavigationAddPoster){
+            navigation = (NavigationAddPoster) context;
+        }else {
+            throw new RuntimeException(context.toString() + "NavigationAddPoster is not implemented");
+        }
+    }
 
     @Override
     public void onMapReady(GoogleMap googleMap){
         ClusteringSettings clusteringSettings = new ClusteringSettings().addMarkersDynamically(true).clusterSize(52);
         googleMap.setClustering(clusteringSettings);
 
-        for (Poster poster: posters) {
-            LatLng location = getLocationFromAddress(poster.getStore().getAddress());
-            int icon = setIcon(poster);
+        for (Store store : stores) {
+            LatLng location = getLocationFromAddress(store.getAddress());
+            int icon = setIcon(store);
             googleMap.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromResource(icon))
                     .position(location))
-                    .setData(poster);
+                    .setData(store);
         }
 
         LatLng lodz = new LatLng(51.759445, 19.457216);
@@ -94,18 +100,15 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
 
         googleMap.setOnMarkerClickListener(marker -> {
             if(!marker.isCluster()){
-                Poster poster = marker.getData();
+                Store store = marker.getData();
                 markerInfo.setVisibility(View.VISIBLE);
-                storeName.setText(poster.getStore().getName());
-                storeAddress.setText(poster.getStore().getAddress());
-                price.setText(String.format("%.2f", poster.getPrice()) + " zł");
-                rating.setText(String.valueOf(poster.getRatingValue()));
+                storeName.setText(store.getName());
+                storeAddress.setText(store.getAddress());
                 selectButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent intent = new Intent(getActivity().getApplicationContext(), PosterDetailsActivity.class);
-                        intent.putExtra("id", poster.getId());
-                        getActivity().startActivity(intent);
+                       poster.setStore(store);
+                       navigation.goToSummary();
                     }
                 });
             }
@@ -119,8 +122,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
         markerInfo.setVisibility(View.GONE);
     }
 
-    public int setIcon(Poster poster){
-        switch (poster.getStore().getName()){
+    public int setIcon(Store store){
+        switch (store.getName()){
             case "Lidl":
                 return R.drawable.lidl;
             case "Kaufland":
@@ -135,7 +138,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_maps, container, false);
+        return inflater.inflate(R.layout.fragment_store_map, container, false);
     }
 
     @Override
@@ -156,7 +159,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
         LatLng latLng = null;
         try {
             address = coder.getFromLocationName(strAddress,1);
-            if (address==null) {
+            if (address == null) {
                 System.out.println("address null");
                 return null;
             }

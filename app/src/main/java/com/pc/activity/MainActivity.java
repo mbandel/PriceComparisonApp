@@ -16,6 +16,7 @@ import com.pc.adapter.CategoryAdapter;
 import com.pc.model.Category;
 import com.pc.model.Product;
 import com.pc.retrofit.Connector;
+import com.pc.util.MenuNavigation;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -35,7 +36,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class MainActivity extends AppCompatActivity{
 
     @BindView(R.id.nav_view)
     NavigationView navigationView;
@@ -62,7 +63,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-        navigationView.setNavigationItemSelectedListener(this);
+
+        MenuNavigation menuNavigation = new MenuNavigation(this);
+        navigationView.setNavigationItemSelectedListener(menuNavigation);
 
         sharedPreferences = getSharedPreferences("myPreferences", Context.MODE_PRIVATE);
         connector = Connector.getInstance();
@@ -81,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if(response.isSuccessful()) {
                     List<Category> categories = response.body();
                     showCategoriesList(categories);
-
                 }
                 else
                     Toast.makeText(getApplicationContext(), "code "+response.code(), Toast.LENGTH_SHORT).show();
@@ -89,8 +91,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             @Override
             public void onFailure(Call<List<Category>> call, Throwable t) {
-                System.out.println("response null");
-
             }
         });
     }
@@ -133,15 +133,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
-            case (R.id.nav_gallery):
-                startActivity(new Intent(MainActivity.this, GalleryActivity.class));
-                break;
-        }
-        return true;
-    }
+
 
 
 

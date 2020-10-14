@@ -25,8 +25,10 @@ import com.pc.R;
 import com.pc.adapter.CommentAdapter;
 import com.pc.model.Comment;
 import com.pc.model.Poster;
+import com.pc.model.Rating;
 import com.pc.model.User;
 import com.pc.retrofit.Connector;
+import com.pc.util.MenuNavigation;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -39,7 +41,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class PosterDetailsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class PosterDetailsActivity extends AppCompatActivity {
 
     @BindView(R.id.nav_view)
     NavigationView navigationView;
@@ -69,9 +71,13 @@ public class PosterDetailsActivity extends AppCompatActivity implements Navigati
     MaterialButton sendButton;
 
     private int posterId;
+    private int userId;
     private Connector connector;
     private SharedPreferences sharedPreferences;
-    String token;
+    private String token;
+    private boolean isRated;
+    private int currentRatingValue;
+    private int ratingId;
 
 
     @Override
@@ -84,15 +90,19 @@ public class PosterDetailsActivity extends AppCompatActivity implements Navigati
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-        navigationView.setNavigationItemSelectedListener(this);
+
+        MenuNavigation menuNavigation = new MenuNavigation(this);
+        navigationView.setNavigationItemSelectedListener(menuNavigation);
 
         sharedPreferences = getSharedPreferences("myPreferences", Context.MODE_PRIVATE);
         connector = Connector.getInstance();
         token = sharedPreferences.getString("token", null);
         posterId = getIntent().getExtras().getInt("id");
+        userId = sharedPreferences.getInt("id", 0);
 
         getPosterById(posterId);
         getCommentsByPosterId(posterId);
+        getRating();
     }
 
     public void fillData(Poster poster){
@@ -107,21 +117,28 @@ public class PosterDetailsActivity extends AppCompatActivity implements Navigati
         }else if (poster.getRatingValue() < 0) {
             rating.setTextColor(getColor(R.color.colorRed));
         }
-        like.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                like.setBackground(getDrawable(R.drawable.orange_border));
+        like.setOnClickListener(view -> {
+            if (!isRated) {
+                like.setEnabled(false);
+                addRating(1);
+                getCommentsByPosterId(posterId);
+                System.out.println("add rating");
+            }
+            else if (isRated && currentRatingValue == -1) {
+                dislike.setEnabled(false);
+                editRating(1);
+                System.out.println("edit rating");
             }
         });
-        dislike.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dislike.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dislike.setBackground(getDrawable(R.drawable.orange_border));
-                    }
-                });
+        dislike.setOnClickListener(view -> {
+            if (!isRated) {
+                dislike.setBackground(getDrawable(R.drawable.orange_border));
+                addRating(-1);
+                System.out.println("add rating");
+            }
+            else if (isRated && currentRatingValue == 1) {
+                System.out.println("edit rating");
+                editRating(-1);
             }
         });
     }
@@ -132,9 +149,7 @@ public class PosterDetailsActivity extends AppCompatActivity implements Navigati
             @Override
             public void onResponse(Call<Poster> call, Response<Poster> response) {
                 if (response.isSuccessful()){
-                    runOnUiThread(() -> {
-                        fillData(response.body());
-                    });
+                    fillData(response.body());
                 } else {
                     Toast.makeText(getApplicationContext(), "Nie ma takiego ogłoszenia", Toast.LENGTH_SHORT).show();
                 }
@@ -143,6 +158,7 @@ public class PosterDetailsActivity extends AppCompatActivity implements Navigati
             @Override
             public void onFailure(Call<Poster> call, Throwable t) {
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_SHORT).show();
+                sendButton.setEnabled(false);
             }
         });
     }
@@ -165,6 +181,96 @@ public class PosterDetailsActivity extends AppCompatActivity implements Navigati
         });
     }
 
+    public void getRating(){
+        Call<Rating> ratingCall = connector.serverApi.getRatingByUserAndPoster(token, posterId, userId);
+        ratingCall.enqueue(new Callback<Rating>() {
+            @Override
+            public void onResponse(Call<Rating> call, Response<Rating> response) {
+                if (response.isSuccessful() && response.body() != null){
+                    isRated = true;
+                    Rating rating = response.body();
+                    ratingId = rating.getId();
+                    System.out.println("RatingID: " + ratingId);
+                    if(rating.getValue() == 1){
+                        like.setBackground(getDrawable(R.drawable.orange_border));
+                        like.setEnabled(false);
+                        dislike.setEnabled(true);
+                        currentRatingValue = 1;
+                        System.out.println("RatingValue: " + rating.getValue());
+                    } else if (rating.getValue() == -1) {
+                        dislike.setBackground(getDrawable(R.drawable.orange_border));
+                        dislike.setEnabled(false);
+                        like.setEnabled(true);
+                        currentRatingValue = -1;
+                        System.out.println("RatingValue: " + rating.getValue());
+                    }
+                }else{
+                    isRated = false;
+                    like.setEnabled(true);
+                    dislike.setEnabled(true);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<Rating> call, Throwable t) { }
+        });
+    }
+
+    public void addRating(int value){
+        User user = new User(userId);
+        Poster poster = new Poster(posterId);
+        Rating rating = new Rating(value, user, poster);
+        Call<String> addRatingCall = connector.serverApi.addRating(token,  rating);
+        addRatingCall.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                setButtonBackground(value);
+                getPosterById(posterId);
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void editRating(int value){
+        Rating rating = new Rating(value);
+        Call<String> editRatingCall = connector.serverApi.editRating(token, ratingId, rating);
+        editRatingCall.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                System.out.println("PUT: "+ response.body());
+                if(response.isSuccessful()) {
+                   setButtonBackground(value);
+                   getPosterById(posterId);
+               }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void setButtonBackground(int value){
+        if (value == 1){
+            like.setEnabled(false);
+            like.setBackground(getDrawable(R.drawable.orange_border));
+            dislike.setBackground(getDrawable(R.drawable.white_border));
+            dislike.setEnabled(true);
+        }
+        else if (value == -1) {
+            dislike.setBackground(getDrawable(R.drawable.orange_border));
+            like.setBackground(getDrawable(R.drawable.white_border));
+            like.setEnabled(true);
+            dislike.setEnabled(false);
+        }
+    }
+
     public void showComments(List<Comment> comments){
         CommentAdapter commentAdapter = new CommentAdapter(this, comments);
         commentsRecyclerView.setAdapter(commentAdapter);
@@ -185,6 +291,9 @@ public class PosterDetailsActivity extends AppCompatActivity implements Navigati
                 if(response.isSuccessful()){
                     Toast.makeText(getApplicationContext(), "Dodano komentarz", Toast.LENGTH_SHORT).show();
                     sendButton.setEnabled(true);
+                    runOnUiThread(() -> {
+                        getCommentsByPosterId(posterId);
+                    });
                 }
                 else {
                     Toast.makeText(getApplicationContext(), "Już dodałeś 1 komentarz", Toast.LENGTH_SHORT).show();
@@ -206,13 +315,4 @@ public class PosterDetailsActivity extends AppCompatActivity implements Navigati
         addComment(posterId, sharedPreferences.getInt("id", 0));
     }
 
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case (R.id.nav_gallery):
-                startActivity(new Intent(getApplicationContext(), GalleryActivity.class));
-                break;
-        }
-        return true;
-    }
 }

@@ -21,6 +21,7 @@ import com.pc.R;
 import com.pc.adapter.ProductAdapter;
 import com.pc.model.Product;
 import com.pc.retrofit.Connector;
+import com.pc.util.MenuNavigation;
 
 import java.util.List;
 
@@ -30,7 +31,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ProductActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class ProductActivity extends AppCompatActivity {
 
 
     @BindView(R.id.drawer_layout)
@@ -41,6 +42,7 @@ public class ProductActivity extends AppCompatActivity implements NavigationView
     private Connector connector;
     private SharedPreferences sharedPreferences;
     private String token;
+    private int id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,33 +57,30 @@ public class ProductActivity extends AppCompatActivity implements NavigationView
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-        navigationView.setNavigationItemSelectedListener(this);
+
+        MenuNavigation menuNavigation = new MenuNavigation(this);
+        navigationView.setNavigationItemSelectedListener(menuNavigation);
 
         sharedPreferences = getSharedPreferences("myPreferences", Context.MODE_PRIVATE);
         connector = Connector.getInstance();
         token = sharedPreferences.getString("token", null);
 
-        int id = getIntent().getExtras().getInt("id");
+        id = getIntent().getExtras().getInt("id");
+        getProductsByCategoryId(id);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         getProductsByCategoryId(id);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
-            case (R.id.nav_gallery):
-                startActivity(new Intent(getApplicationContext(), GalleryActivity.class));
-                break;
-        }
-        return true;
-    }
 
     public void getProductsByCategoryId(int id){
         Call<List<Product>> productsCall = connector.serverApi.getProductsByCategoryId(token, id);
@@ -90,7 +89,7 @@ public class ProductActivity extends AppCompatActivity implements NavigationView
             public void onResponse(Call<List<Product>> call, Response<List<Product>> response) {
                 if(response.isSuccessful()){
                     List<Product> products = response.body();
-                    showProductList(products);
+                        showProductList(products);
                 }else {
                     Toast.makeText(getApplicationContext(), R.string.server_error, Toast.LENGTH_SHORT).show();
                 }
