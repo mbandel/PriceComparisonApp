@@ -114,11 +114,16 @@ public class LoginFragment extends Fragment implements Validator.ValidationListe
                 @Override
                 public void onResponse(Call<Token> call, Response<Token> response) {
                     if (response.isSuccessful()) {
-                        sharedPreferences.edit().putString("token", "Bearer " + response.body().getToken()).commit();
+                        sharedPreferences.edit().putString("token", "Bearer " + response.body().getToken()).apply();
                         findUserByEmail(sharedPreferences.getString("token", null), email.getText().toString());
                         Intent intent = new Intent(getActivity(), MainActivity.class);
                         startActivity(intent);
+                        getActivity().finish();
                         progressLayout.setVisibility(View.INVISIBLE);
+                    }
+                    else {
+                        loginButton.setEnabled(true);
+                        Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.incorrect_data), Toast.LENGTH_LONG).show();
                     }
                 }
 

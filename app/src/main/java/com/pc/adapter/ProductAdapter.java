@@ -57,10 +57,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     @Override
     public int getItemCount() {
-        return products.size();
+        if (products != null)
+            return products.size();
+        else
+            return 0;
     }
-
-
 
     static class ViewHolder extends RecyclerView.ViewHolder{
         @BindView(R.id.name)

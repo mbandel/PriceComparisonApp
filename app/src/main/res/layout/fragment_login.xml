@@ -136,7 +136,7 @@
         android:id="@+id/login_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/border_bg"
+        android:background="@drawable/green_bg"
         android:text="@string/login"
         android:textColor="@color/colorWhite"
         android:textSize="18sp"

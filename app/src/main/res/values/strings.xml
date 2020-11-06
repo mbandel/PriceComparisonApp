@@ -57,5 +57,5 @@
     <string name="product">Produkt</string>
     <string name="poster_added">Ogłoszenie dodane pomyślnie</string>
     <string name="poster_exist">Takie ogłoszenie już istnieje</string>
-
+    <string name="incorrect_data">Login lub hasło jest niepoprawne</string>
 </resources>

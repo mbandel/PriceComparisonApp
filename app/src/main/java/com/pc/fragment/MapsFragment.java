@@ -14,8 +14,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.androidmapsextensions.ClusteringSettings;
 
@@ -39,14 +42,18 @@ import com.pc.model.Store;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnTextChanged;
 
-public class MapsFragment extends Fragment implements OnMapReadyCallback{
+public class MapsFragment extends Fragment implements OnMapReadyCallback, SearchView.OnQueryTextListener {
 
+    @BindView(R.id.search_edit_text)
+    SearchView searchView;
     @BindView(R.id.info_close)
     ImageView infoClose;
     @BindView(R.id.info_panel)
@@ -65,6 +72,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
     MaterialButton selectButton;
 
    private List<Poster> posters;
+   private GoogleMap googleMap;
 
     public static MapsFragment newInstance(List<Poster> posters){
         MapsFragment mapsFragment = new MapsFragment();
@@ -76,17 +84,21 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
 
 
     @Override
-    public void onMapReady(GoogleMap googleMap){
+    public void onMapReady(GoogleMap google){
+        googleMap = google;
         ClusteringSettings clusteringSettings = new ClusteringSettings().addMarkersDynamically(true).clusterSize(52);
         googleMap.setClustering(clusteringSettings);
+        searchView.setOnQueryTextListener(this);
 
         for (Poster poster: posters) {
             LatLng location = getLocationFromAddress(poster.getStore().getAddress());
             int icon = setIcon(poster);
-            googleMap.addMarker(new MarkerOptions()
+            Marker marker = googleMap.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromResource(icon))
-                    .position(location))
-                    .setData(poster);
+                    .position(location)
+                    .title(poster.getPrice().toString()));
+            marker.setData(poster);
+            marker.showInfoWindow();
         }
 
         LatLng lodz = new LatLng(51.759445, 19.457216);
@@ -103,7 +115,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
                 selectButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent intent = new Intent(getActivity().getApplicationContext(), PosterDetailsActivity.class);
+                        Intent intent = new Intent(getActivity(), PosterDetailsActivity.class);
                         intent.putExtra("id", poster.getId());
                         getActivity().startActivity(intent);
                     }
@@ -128,6 +140,22 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
             default:
                 return R.drawable.biedronka;
         }
+    }
+
+    @Override
+    public boolean onQueryTextChange(String s) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String s) {
+        LatLng latLng = getLocationFromAddress(searchView.getQuery().toString());
+        if (latLng != null) {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
+        } else {
+            Toast.makeText(getActivity(), "Podaj poprawny adres", Toast.LENGTH_SHORT).show();
+        }
+        return false;
     }
 
     @Nullable
@@ -156,14 +184,15 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback{
         LatLng latLng = null;
         try {
             address = coder.getFromLocationName(strAddress,1);
-            if (address==null) {
+            if (address.isEmpty()) {
                 System.out.println("address null");
                 return null;
+            }else {
+                Address location = address.get(0);
+                location.getLatitude();
+                location.getLongitude();
+                latLng = new LatLng((double) (location.getLatitude()), (double) (location.getLongitude()));
             }
-            Address location=address.get(0);
-            location.getLatitude();
-            location.getLongitude();
-            latLng = new LatLng((double) (location.getLatitude()), (double) (location.getLongitude()));
         }catch (IOException e){
             e.printStackTrace();
         }

@@ -44,7 +44,7 @@
             android:id="@+id/filter_stores_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/border_bg"
+            android:background="@drawable/green_bg"
             android:text="@string/choose_store"
             android:textColor="@color/colorWhite"
             app:layout_constraintTop_toBottomOf="@id/title"
@@ -62,7 +62,7 @@
             android:id="@+id/sort_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/border_bg"
+            android:background="@drawable/green_bg"
             android:text="@string/sort"
             android:textColor="@color/colorWhite"
             app:layout_constraintTop_toBottomOf="@id/title"
@@ -76,7 +76,6 @@
             />
 
         <FrameLayout
-            android:paddingTop="10dp"
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
             android:layout_height="0dp"

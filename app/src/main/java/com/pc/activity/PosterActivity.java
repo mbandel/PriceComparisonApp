@@ -248,7 +248,10 @@ public class PosterActivity extends AppCompatActivity implements NavigationView.
                     productTitle.setVisibility(View.VISIBLE);
                     sortButton.setVisibility(View.VISIBLE);
                     filterStoreButton.setVisibility(View.VISIBLE);
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, posterFragment).commit();
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment_container, posterFragment).
+                            commit();
                     break;
                 }
             case (R.id.bottom_nav_map):

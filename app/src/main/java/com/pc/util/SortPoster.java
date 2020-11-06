@@ -1,10 +1,10 @@
 package com.pc.util;
 
-import com.google.common.collect.FluentIterable;
 import com.pc.model.Poster;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SortPoster {
 
@@ -19,8 +19,8 @@ public class SortPoster {
 
     public static List<Poster> sortByRating(List<Poster> list, boolean sortAsc){
         Collections.sort(list, (t1, t2) -> {
-            Integer rating1 = new Integer(t1.getRatingValue());
-            Integer rating2 = new Integer(t2.getRatingValue());
+            Integer rating1 = t1.getRatingValue();
+            Integer rating2 = t2.getRatingValue();
             if (sortAsc)
                 return rating1.compareTo(rating2);
             else return -rating1.compareTo(rating2);
@@ -29,9 +29,9 @@ public class SortPoster {
     }
 
     public static List<Poster> filterByStores(List<Poster> list, List<String> stores){
-        return FluentIterable.from(list).filter(store -> {
+        return list.stream().filter(store -> {
             assert store != null;
             return stores.contains(store.getStore().getName());
-        }).toList();
+        }).collect(Collectors.toList());
     }
 }

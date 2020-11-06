@@ -14,6 +14,26 @@
     android:layout_height="match_parent"
     />
 
+    <SearchView
+        android:id="@+id/search_edit_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/green_border"
+        android:iconifiedByDefault="false"
+        android:drawableStart="@drawable/ic_search"
+        android:drawablePadding="12dp"
+        android:focusable="auto"
+        android:queryHint="Podaj miasto lub adres"
+        android:importantForAutofill="no"
+        android:padding="10dp"
+        android:inputType="textPostalAddress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"  />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/info_panel"
         android:layout_width="0dp"
@@ -150,7 +170,7 @@
             android:id="@+id/select_btn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="@drawable/border_bg"
+            android:background="@drawable/green_bg"
             android:text="Wiecej"
             android:textColor="@color/colorWhite"
             android:textSize="18sp"

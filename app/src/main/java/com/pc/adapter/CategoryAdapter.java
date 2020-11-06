@@ -20,8 +20,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.annotations.NonNull;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
-
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder> {
 
     private Activity activity;
@@ -96,6 +94,6 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
             return R.drawable.ic_meat;
         else if (iconType.equals("ryby"))
             return R.drawable.ic_fish;
-        else return R.drawable.border_bg;
+        else return R.drawable.green_bg;
     }
 }

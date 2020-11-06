@@ -5,6 +5,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,11 +23,15 @@ import com.pc.adapter.ProductAdapter;
 import com.pc.model.Product;
 import com.pc.retrofit.Connector;
 import com.pc.util.MenuNavigation;
+import com.pc.util.SortProduct;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.OnTextChanged;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -43,6 +48,8 @@ public class ProductActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private String token;
     private int id;
+    private List<Product> products = new ArrayList<>();
+    private boolean showLinear, showGrid, sortAsc, listCreated;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,15 +88,53 @@ public class ProductActivity extends AppCompatActivity {
         return true;
     }
 
+    @OnTextChanged(R.id.search_edit_text)
+    public void onSearchInputChange(CharSequence charSequence) {
+        if (!charSequence.toString().trim().equals("")){
+            showProductList(SortProduct.filterByProductName(products, charSequence.toString()));
+        } else {
+            showProductList(products);
+        }
+    }
 
-    public void getProductsByCategoryId(int id){
+    @OnClick(R.id.sort_az)
+    void onSortClick() {
+        if (sortAsc == true){
+            sortAsc = false;
+        }else{
+            sortAsc = true;
+        }
+        if(listCreated)
+            showProductList(SortProduct.sortAlphabetically(products, sortAsc));
+    }
+
+
+    @OnClick(R.id.grid)
+    void setGridLayout(){
+        showGrid = true;
+        showLinear = false;
+        if (listCreated)
+            showProductGridList(products);
+    }
+
+    @OnClick(R.id.linear)
+    void setLinearLayout(){
+        showGrid = false;
+        showLinear = true;
+        if (listCreated)
+            showProductLinearList(products);
+    }
+
+    public void getProductsByCategoryId(int id) {
         Call<List<Product>> productsCall = connector.serverApi.getProductsByCategoryId(token, id);
         productsCall.enqueue(new Callback<List<Product>>() {
             @Override
             public void onResponse(Call<List<Product>> call, Response<List<Product>> response) {
                 if(response.isSuccessful()){
-                    List<Product> products = response.body();
-                        showProductList(products);
+                    products = response.body();
+                    listCreated = true;
+                    showLinear = true;
+                    showProductList(products);
                 }else {
                     Toast.makeText(getApplicationContext(), R.string.server_error, Toast.LENGTH_SHORT).show();
                 }
@@ -102,9 +147,23 @@ public class ProductActivity extends AppCompatActivity {
         });
     }
 
-    public void showProductList(List<Product> products){
+    public void showProductList(List<Product> products) {
+        if (showLinear) {
+            showProductLinearList(products);
+        } else {
+            showProductGridList(products);
+        }
+    }
+
+    public void showProductLinearList(List<Product> products) {
         ProductAdapter productAdapter = new ProductAdapter(this, products);
         recyclerView.setAdapter(productAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    public void showProductGridList(List<Product> products) {
+        ProductAdapter productAdapter = new ProductAdapter(this, products);
+        recyclerView.setAdapter(productAdapter);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
     }
 }
