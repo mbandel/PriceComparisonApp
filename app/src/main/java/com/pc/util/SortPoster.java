@@ -34,4 +34,13 @@ public class SortPoster {
             return stores.contains(store.getStore().getName());
         }).collect(Collectors.toList());
     }
+
+    public static List<Poster> sortByCategory(List<Poster> posters) {
+        Collections.sort(posters, (t1, t2) -> {
+            String category1 = t1.getProduct().getCategory().getName();
+            String category2 = t2.getProduct().getCategory().getName();
+            return category1.compareTo(category2);
+        });
+        return posters;
+    }
 }

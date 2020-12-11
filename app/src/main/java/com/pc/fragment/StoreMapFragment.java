@@ -5,12 +5,9 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +17,6 @@ import android.widget.TextView;
 
 import com.androidmapsextensions.ClusteringSettings;
 
-import com.androidmapsextensions.Marker;
 import com.androidmapsextensions.MarkerOptions;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.androidmapsextensions.GoogleMap;
@@ -33,12 +29,11 @@ import com.google.android.gms.maps.model.LatLng;
 
 import com.google.android.material.button.MaterialButton;
 import com.pc.R;
-import com.pc.activity.PosterDetailsActivity;
 import com.pc.model.Poster;
 import com.pc.model.Store;
 import com.pc.util.NavigationAddPoster;
-
-import org.w3c.dom.Text;
+import com.pc.util.NavigationAddShoppingList;
+import com.pc.util.NavigationType;
 
 import java.io.IOException;
 import java.util.List;
@@ -46,6 +41,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static com.pc.util.NavigationType.*;
 
 public class StoreMapFragment extends Fragment implements OnMapReadyCallback{
 
@@ -64,20 +61,31 @@ public class StoreMapFragment extends Fragment implements OnMapReadyCallback{
 
     private List<Store> stores;
     private Poster poster;
-    private NavigationAddPoster navigation;
+
+    private NavigationAddShoppingList navigationAddShoppingList;
+    private NavigationAddPoster navigationAddPoster;
+    private NavigationType navigationType;
 
     public StoreMapFragment(List<Store> stores, Poster poster){
         this.stores = stores;
         this.poster = poster;
     }
 
+    public StoreMapFragment(List<Store> stores){
+        this.stores = stores;
+    }
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof NavigationAddPoster){
-            navigation = (NavigationAddPoster) context;
-        }else {
-            throw new RuntimeException(context.toString() + "NavigationAddPoster is not implemented");
+            navigationAddPoster = (NavigationAddPoster) context;
+            navigationType = ADD_POSTER;
+        } else if (context instanceof NavigationAddShoppingList) {
+            navigationAddShoppingList = (NavigationAddShoppingList) context;
+            navigationType = ADD_SHOPPING_LIST;
+        } else {
+            throw new RuntimeException(context.toString() + "Navigation interface is not implemented");
         }
     }
 
@@ -104,12 +112,16 @@ public class StoreMapFragment extends Fragment implements OnMapReadyCallback{
                 markerInfo.setVisibility(View.VISIBLE);
                 storeName.setText(store.getName());
                 storeAddress.setText(store.getAddress());
-                selectButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                       poster.setStore(store);
-                       navigation.goToSummary();
-                    }
+                selectButton.setOnClickListener(view -> {
+                   poster.setStore(store);
+                   switch (navigationType) {
+                       case ADD_POSTER:
+                           navigationAddPoster.goToSummary();
+                           break;
+                       case ADD_SHOPPING_LIST:
+                           navigationAddShoppingList.goToEdition(store);
+                           break;
+                   }
                 });
             }
             return false;
@@ -160,13 +172,13 @@ public class StoreMapFragment extends Fragment implements OnMapReadyCallback{
         try {
             address = coder.getFromLocationName(strAddress,1);
             if (address == null) {
-                System.out.println("address null");
+
                 return null;
             }
             Address location=address.get(0);
             location.getLatitude();
             location.getLongitude();
-            latLng = new LatLng((double) (location.getLatitude()), (double) (location.getLongitude()));
+            latLng = new LatLng(location.getLatitude(), location.getLongitude());
         }catch (IOException e){
             e.printStackTrace();
         }

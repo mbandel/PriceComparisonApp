@@ -5,6 +5,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -12,6 +13,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +38,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
+import com.pc.PriceComparison;
 import com.pc.R;
 import com.pc.adapter.ProductAdapter;
 import com.pc.fragment.MapsFragment;
@@ -46,7 +49,11 @@ import com.pc.model.Store;
 import com.pc.model.Token;
 import com.pc.retrofit.Connector;
 import com.pc.util.MenuNavigation;
+import com.pc.util.NavigationAddPoster;
+import com.pc.util.NavigationEditPosterList;
 import com.pc.util.SortPoster;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,7 +67,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class PosterActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class PosterActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, NavigationEditPosterList {
 
     @BindView(R.id.nav_view)
     NavigationView navigationView;
@@ -86,6 +93,10 @@ public class PosterActivity extends AppCompatActivity implements NavigationView.
     private boolean fragmentCreated;
     private List<Poster> posters;
     private List<Store> stores;
+    private String currentFragment;
+
+    private final String mapsFragmentString = "MAPS_FRAGMENT";
+    private final String posterFragmentString = "POSTER_FRAGMENT";
 
 
     @Override
@@ -110,50 +121,33 @@ public class PosterActivity extends AppCompatActivity implements NavigationView.
         productTitle.setText(getIntent().getExtras().getString("name"));
         getPostersByProductId(productId);
         getStores();
-
+        System.out.println("PosterActivity onCreate()");
     }
+
 
     @Override
     protected void onResume() {
         super.onResume();
+        System.out.println("PosterActivity onResume()");
         getPostersByProductId(productId);
     }
 
-    public void getPostersByProductId(int id){
-        Call<List<Poster>> postersCall = connector.serverApi.getPostersByProductId(token, id);
-        postersCall.enqueue(new Callback<List<Poster>>() {
-            @Override
-            public void onResponse(Call<List<Poster>> call, Response<List<Poster>> response) {
-                if(response.isSuccessful()){
-                    posters = response.body();
-                    showPosters(posters);
-                    mapsFragment = MapsFragment.newInstance(posters);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<Poster>> call, Throwable t) { }
-        });
+    @Override
+    protected void onStop() {
+        System.out.println("PosterActivity onStop()");
+        super.onStop();
     }
 
-    public void showPosters(List<Poster> posterList){
-        posterFragment = PosterFragment.newInstance(posterList);
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, posterFragment).commit();
+    @Override
+    protected void onRestart() {
+        System.out.println("PosterActivity onRestart()");
+        super.onRestart();
     }
 
-    public void getStores(){
-        Call<List<Store>> storesCall = connector.serverApi.getStores(token);
-        storesCall.enqueue(new Callback<List<Store>>() {
-            @Override
-            public void onResponse(Call<List<Store>> call, Response<List<Store>> response) {
-                stores = response.body();
-            }
-
-            @Override
-            public void onFailure(Call<List<Store>> call, Throwable t) {
-
-            }
-        });
+    @Override
+    protected void onDestroy() {
+        System.out.println("PosterActivity onDestroy()");
+        super.onDestroy();
     }
 
     @Override
@@ -162,7 +156,6 @@ public class PosterActivity extends AppCompatActivity implements NavigationView.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
-
 
 
     @OnClick(R.id.sort_btn)
@@ -248,6 +241,7 @@ public class PosterActivity extends AppCompatActivity implements NavigationView.
                     productTitle.setVisibility(View.VISIBLE);
                     sortButton.setVisibility(View.VISIBLE);
                     filterStoreButton.setVisibility(View.VISIBLE);
+                    currentFragment = posterFragmentString;
                     getSupportFragmentManager()
                             .beginTransaction()
                             .replace(R.id.fragment_container, posterFragment).
@@ -256,14 +250,68 @@ public class PosterActivity extends AppCompatActivity implements NavigationView.
                 }
             case (R.id.bottom_nav_map):
                 if(mapsFragment != null) {
+                    currentFragment = mapsFragmentString;
                     getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, mapsFragment).commit();
                     filterStoreButton.setVisibility(View.GONE);
                     productTitle.setVisibility(View.GONE);
                     sortButton.setVisibility(View.GONE);
+                    PriceComparison.createSnackbar(findViewById(R.id.poster_layout), "Widoczne sklepy na mapie zaktualizują listę ogłoszeń").show();
                     break;
                 }
         }
         return true;
     }
 
+    @Override
+    public void editPosterList(List<Poster> posters) {
+       this.posters = posters;
+    }
+
+    public void getPostersByProductId(int id){
+        Call<List<Poster>> postersCall = connector.serverApi.getPostersByProductId(token, id);
+        postersCall.enqueue(new Callback<List<Poster>>() {
+            @Override
+            public void onResponse(Call<List<Poster>> call, Response<List<Poster>> response) {
+                if(response.isSuccessful()){
+                    posters = response.body();
+                    showPosters(posters);
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Poster>> call, Throwable t) { }
+        });
+    }
+
+    public void showPosters(List<Poster> posterList){
+        mapsFragment = MapsFragment.newInstance(posterList);
+        posterFragment = PosterFragment.newInstance(posterList);
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, getCurrentFragment()).commit();
+    }
+
+    public void getStores(){
+        Call<List<Store>> storesCall = connector.serverApi.getStores(token);
+        storesCall.enqueue(new Callback<List<Store>>() {
+            @Override
+            public void onResponse(@NotNull Call<List<Store>> call, @NotNull Response<List<Store>> response) {
+                stores = response.body();
+            }
+
+            @Override
+            public void onFailure(@NotNull Call<List<Store>> call, Throwable t) { }
+        });
+    }
+
+    public Fragment getCurrentFragment(){
+        if (currentFragment == null) {
+            return posterFragment;
+        }
+        else if (currentFragment.equals(posterFragmentString)){
+            return posterFragment;
+        }
+        else {
+            return mapsFragment;
+        }
+    }
 }

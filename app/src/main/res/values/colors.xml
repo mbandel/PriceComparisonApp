@@ -10,4 +10,5 @@
     <color name="colorOrange">#F57C00</color>
     <color name="colorPink">#ED40DC</color>
     <color name="colorBlack">#000000</color>
+    <color name="colorSnackBar">#FAFAEC</color>
 </resources>

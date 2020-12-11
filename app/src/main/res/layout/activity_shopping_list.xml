@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:clickable="true">
+
+        <include
+            android:id="@+id/app_bar_menu"
+            layout="@layout/app_bar_main"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/spinner_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginLeft="24dp"
+            android:layout_marginRight="24dp"
+            android:textColorHint="@color/colorGrey"
+            app:boxStrokeColor="@color/colorAccent"
+            app:hintTextColor="@color/colorBlack"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/app_bar_menu"
+            app:layout_constraintWidth_percent="0.7">
+
+            <AutoCompleteTextView
+                android:id="@+id/shopping_list_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:cursorVisible="false"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:hint="wybierz listę"
+                android:textStyle="bold"
+                android:importantForAutofill="no" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <ImageView
+            android:id="@+id/add_btn"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:src="@drawable/ic_add"
+            app:layout_constraintTop_toBottomOf="@id/app_bar_menu"
+            app:layout_constraintStart_toEndOf="@id/spinner_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/shopping_list_recycler_view"
+            />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/shopping_list_recycler_view"
+        android:background="@drawable/black_border"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="24dp"
+        android:padding="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_layout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    <include
+        android:id="@+id/bottom_layout"
+        layout="@layout/bottom_info_layout"
+        app:layout_behavior="@string/bottom_sheet_behavior" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_main"
+        app:menu="@menu/activity_main_drawer" />
+
+</androidx.drawerlayout.widget.DrawerLayout>

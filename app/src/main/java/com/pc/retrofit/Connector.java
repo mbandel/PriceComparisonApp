@@ -2,13 +2,13 @@ package com.pc.retrofit;
 
 import com.pc.R;
 
-import lombok.Getter;
+
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
-@Getter
+
 public class Connector {
 
     private static Connector connector = null;

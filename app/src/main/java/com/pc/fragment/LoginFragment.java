@@ -1,5 +1,6 @@
 package com.pc.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import com.google.android.material.textfield.TextInputEditText;
 import com.mobsandgeeks.saripaar.annotation.Email;
 import com.mobsandgeeks.saripaar.annotation.Password;
+import com.pc.PriceComparison;
 import com.pc.R;
 import com.pc.activity.MainActivity;
 import com.pc.model.Credentials;
@@ -51,12 +53,14 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import retrofit2.Response;
 
+import static com.pc.R.id.email_input;
+
 public class LoginFragment extends Fragment implements Validator.ValidationListener, TextWatcher {
 
     @BindView(R.id.login_btn)
     Button loginButton;
     @Email
-    @BindView(R.id.email_input)
+    @BindView(email_input)
     TextInputEditText email;
     @Password(min = 6, scheme = Password.Scheme.ALPHA_NUMERIC_MIXED_CASE)
     @BindView(R.id.password_input)
@@ -67,8 +71,6 @@ public class LoginFragment extends Fragment implements Validator.ValidationListe
     private boolean isInputValid = false;
     private Validator validator;
     private Connector connector;
-    private JSONObject jsonObject = new JSONObject();
-    private OkHttpClient httpClient = new OkHttpClient();
     private SharedPreferences sharedPreferences;
 
     public LoginFragment() {
@@ -123,13 +125,15 @@ public class LoginFragment extends Fragment implements Validator.ValidationListe
                     }
                     else {
                         loginButton.setEnabled(true);
-                        Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.incorrect_data), Toast.LENGTH_LONG).show();
+                        PriceComparison.createSnackbar(getActivity().findViewById(R.id.constraintLayout), getResources().getString(R.string.incorrect_data)).show();
+                        progressLayout.setVisibility(View.INVISIBLE);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Token> call, Throwable t) {
-                    Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_LONG).show();
+                    loginButton.setEnabled(true);
+                    PriceComparison.createSnackbar(getActivity().findViewById(R.id.constraintLayout), getResources().getString(R.string.server_error)).show();
                     progressLayout.setVisibility(View.INVISIBLE);
                 }
             });
@@ -140,9 +144,10 @@ public class LoginFragment extends Fragment implements Validator.ValidationListe
         Call<User> findUserCall = connector.serverApi.findUserByEmail(token, email);
         findUserCall.enqueue(new Callback<User>() {
             @Override
-            public void onResponse(Call<User> call, retrofit2.Response<User> response) {
+            public void onResponse(@NotNull Call<User> call, @NotNull retrofit2.Response<User> response) {
                 if(response.isSuccessful()) {
-                    sharedPreferences.edit().putInt("id", response.body().getId()).commit();
+                    sharedPreferences.edit().putInt("id", response.body().getId())
+                            .apply();
                 }
             }
 

@@ -6,6 +6,7 @@ import com.pc.model.Credentials;
 import com.pc.model.Poster;
 import com.pc.model.Product;
 import com.pc.model.Rating;
+import com.pc.model.ShoppingList;
 import com.pc.model.Store;
 import com.pc.model.Token;
 import com.pc.model.User;
@@ -55,6 +56,12 @@ public interface ServerApi {
     @GET("stores")
     public Call<List<Store>> getStores(@Header("Authorization") String token);
 
+    @GET("shoppingList/user/{id}")
+    public Call<List<ShoppingList>> getShoppingListsByUserId(@Header("Authorization") String token, @Path("id") int id);
+
+    @GET("shoppingList/{id}/posters")
+    public Call<List<Poster>> getPostersByShoppingList(@Header("Authorization") String token, @Path("id") int id);
+
     @POST("rating")
     public Call<String> addRating(@Header("Authorization") String token, @Body Rating rating);
 
@@ -70,6 +77,9 @@ public interface ServerApi {
     @POST("register")
     public Call<String> createUser(@Body User user);
 
-    @POST("/api/poster")
+    @POST("poster")
     public Call<String> addPoster(@Header("Authorization") String token, @Body Poster poster);
+
+    @POST("shoppingList")
+    public Call<String> addShoppingList(@Header("Authorization") String token, @Body ShoppingList shoppingList);
 }

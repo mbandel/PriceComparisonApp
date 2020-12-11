@@ -1,11 +1,16 @@
 package com.pc.activity;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.navigation.NavigationView;
 import com.pc.R;
 import com.pc.adapter.CategoryAdapter;
@@ -128,7 +133,18 @@ public class MainActivity extends AppCompatActivity{
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.exit_dialog);
+        MaterialButton noButton = dialog.findViewById(R.id.no_btn);
+        noButton.setOnClickListener(view -> {
+            dialog.dismiss();
+        });
+        MaterialButton yesButton = dialog.findViewById(R.id.yes_btn);
+        yesButton.setOnClickListener( view -> {
+            dialog.dismiss();
+            finishAffinity();
+        });
+        dialog.show();
     }
+
 }

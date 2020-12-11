@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.pc.R;
 import com.pc.activity.ProductActivity;
 import com.pc.model.Category;
+import com.pc.util.IconManager;
 
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     public void onBindViewHolder(@NonNull CategoryAdapter.ViewHolder holder, int position) {
         Category category = categories.get(position);
         holder.name.setText(category.getName());
-        holder.icon.setImageResource(setIcon(category.getName()));
+        holder.icon.setImageResource(IconManager.setIcon(category.getName()));
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,29 +72,5 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
-    }
-
-    public int setIcon(String iconType){
-        if (iconType.equals("słodycze"))
-            return R.drawable.ic_candy;
-        else if (iconType.equals("pieczywo"))
-            return R.drawable.ic_bread;
-        else if (iconType.equals("napoje"))
-            return R.drawable.ic_drinks;
-        else if (iconType.equals("warzywa"))
-            return R.drawable.ic_vegetable;
-        else if (iconType.equals("owoce"))
-            return R.drawable.ic_fruit;
-        else if (iconType.equals("przyprawy"))
-            return R.drawable.spices;
-        else if (iconType.equals("alkohole"))
-            return R.drawable.ic_alcohol;
-        else if (iconType.equals("nabiał"))
-            return R.drawable.ic_milk;
-        else if (iconType.equals("mięso"))
-            return R.drawable.ic_meat;
-        else if (iconType.equals("ryby"))
-            return R.drawable.ic_fish;
-        else return R.drawable.green_bg;
     }
 }

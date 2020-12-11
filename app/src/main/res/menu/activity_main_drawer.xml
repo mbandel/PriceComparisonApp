@@ -16,5 +16,9 @@ tools:showIn="navigation_view">
         android:id="@+id/nav_promotion"
         android:icon="@drawable/ic_sale"
         android:title="@string/menu_promotions" />
+    <item
+        android:id="@+id/nav_shopping"
+        android:icon="@drawable/ic_shopping_list"
+        android:title="@string/menu_shopping" />
 </group>
 </menu>

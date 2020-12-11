@@ -8,4 +8,5 @@ public interface NavigationAddPoster {
     void goToMap();
     void goToSummary();
     void addPoster(Poster poster);
+
 }

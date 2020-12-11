@@ -1,5 +1,6 @@
 package com.pc.fragment;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -116,30 +117,20 @@ public class RegisterFragment extends Fragment implements Validator.ValidationLi
             registerCall.enqueue(new Callback<String>() {
                 @Override
                 public void onResponse(Call<String> call, Response<String> response) {
-                    if (response.isSuccessful()){
-                        System.out.println(response.body());
-                        System.out.println("response code " + response.code());
-                        getActivity().runOnUiThread(() -> {
-                            Toast.makeText(getActivity().getApplicationContext(), "rejestracja zakończona sukcesem", Toast.LENGTH_SHORT).show();
-                            progressLayout.setVisibility(View.INVISIBLE);
-                        });
-                    }else{
-                        System.out.println(response.body());
-                        System.out.println("response code " + response.code());
-                        getActivity().runOnUiThread(() -> {
-                            Toast.makeText(getActivity().getApplicationContext(), "rejestracja zakończona niepowodzeniem", Toast.LENGTH_SHORT).show();
-                            progressLayout.setVisibility(View.INVISIBLE);
-                        });
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getActivity().getApplicationContext(), "rejestracja zakończona sukcesem", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getActivity().getApplicationContext(), "rejestracja zakończona niepowodzeniem", Toast.LENGTH_SHORT).show();
                     }
+                    progressLayout.setVisibility(View.INVISIBLE);
                 }
+
                 @Override
                 public void onFailure(Call<String> call, Throwable t) {
-                    getActivity().runOnUiThread(() -> {
-                        Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_SHORT).show();
-                    });
+                    Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_SHORT).show();
+                    progressLayout.setVisibility(View.INVISIBLE);
                 }
             });
-            progressLayout.setVisibility(View.INVISIBLE);
         }
     }
 

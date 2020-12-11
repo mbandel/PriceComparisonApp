@@ -6,6 +6,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -24,6 +25,7 @@ import com.androidmapsextensions.ClusteringSettings;
 
 import com.androidmapsextensions.Marker;
 import com.androidmapsextensions.MarkerOptions;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.androidmapsextensions.GoogleMap;
 import com.androidmapsextensions.SupportMapFragment;
@@ -31,6 +33,7 @@ import com.androidmapsextensions.SupportMapFragment;
 
 import com.androidmapsextensions.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
 import com.google.android.material.button.MaterialButton;
@@ -38,17 +41,23 @@ import com.pc.R;
 import com.pc.activity.PosterDetailsActivity;
 import com.pc.model.Poster;
 import com.pc.model.Store;
+import com.pc.util.MapStateManager;
+import com.pc.util.NavigationAddPoster;
+import com.pc.util.NavigationEditPosterList;
 
 import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTextChanged;
+import timber.log.Timber;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback, SearchView.OnQueryTextListener {
 
@@ -73,6 +82,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Search
 
    private List<Poster> posters;
    private GoogleMap googleMap;
+   private NavigationEditPosterList navigation;
 
     public static MapsFragment newInstance(List<Poster> posters){
         MapsFragment mapsFragment = new MapsFragment();
@@ -82,6 +92,43 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Search
 
     private MapsFragment(){ }
 
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        System.out.println("MapsFragment OnAttach()");
+        if (context instanceof NavigationEditPosterList){
+            navigation = (NavigationEditPosterList) context;
+        }else {
+            throw new RuntimeException(context.toString() + "NavigationEditPosterList is not implemented");
+        }
+    }
+
+    @Override
+    public void onPause() {
+
+        MapStateManager mgr = new MapStateManager(requireContext());
+        mgr.saveMapState(googleMap);
+        super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+
+        super.onDestroy();
+    }
+
+    @Override
+    public void onResume() {
+        this.setRetainInstance(true);
+        super.onResume();
+    }
+
 
     @Override
     public void onMapReady(GoogleMap google){
@@ -90,19 +137,25 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Search
         googleMap.setClustering(clusteringSettings);
         searchView.setOnQueryTextListener(this);
 
+        MapStateManager mgr = new MapStateManager(getContext());
+        CameraPosition position = mgr.getSavedCameraPosition();
+        if (position != null) {
+            CameraUpdate update = CameraUpdateFactory.newCameraPosition(position);
+            googleMap.moveCamera(update);
+            googleMap.setMapType(mgr.getSavedMapType());
+        }else {
+            LatLng lodz = new LatLng(51.759445, 19.457216);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lodz, 12));
+        }
         for (Poster poster: posters) {
             LatLng location = getLocationFromAddress(poster.getStore().getAddress());
             int icon = setIcon(poster);
-            Marker marker = googleMap.addMarker(new MarkerOptions()
+            googleMap.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromResource(icon))
-                    .position(location)
-                    .title(poster.getPrice().toString()));
-            marker.setData(poster);
-            marker.showInfoWindow();
+                    .position(location))
+                    .setData(poster);
         }
 
-        LatLng lodz = new LatLng(51.759445, 19.457216);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lodz, 12));
 
         googleMap.setOnMarkerClickListener(marker -> {
             if(!marker.isCluster()){
@@ -110,20 +163,29 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Search
                 markerInfo.setVisibility(View.VISIBLE);
                 storeName.setText(poster.getStore().getName());
                 storeAddress.setText(poster.getStore().getAddress());
-                price.setText(String.format("%.2f", poster.getPrice()) + " zł");
+                price.setText(String.format(Locale.ENGLISH, "%.2f zł", poster.getPrice()));
                 rating.setText(String.valueOf(poster.getRatingValue()));
-                selectButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(getActivity(), PosterDetailsActivity.class);
-                        intent.putExtra("id", poster.getId());
-                        getActivity().startActivity(intent);
-                    }
+                selectButton.setOnClickListener(view -> {
+                    Intent intent = new Intent(getActivity(), PosterDetailsActivity.class);
+                    intent.putExtra("id", poster.getId());
+                    getActivity().startActivity(intent);
                 });
             }
             return false;
         });
         progressLayout.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void onDetach() {
+//        List<Poster> newPosterList = new ArrayList<>();
+//        for (int i = 0; i < googleMap.getDisplayedMarkers().size(); i++){
+//            newPosterList.add(googleMap.getDisplayedMarkers().get(i).getData());
+//        }
+//        Timber.e("New poster list size: " + newPosterList.size());
+//        navigation.editPosterList(newPosterList);
+        System.out.println("MapsFragment onDetach()");
+        super.onDetach();
     }
 
     @OnClick(R.id.info_close)
@@ -178,6 +240,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Search
         }
     }
 
+
     public LatLng getLocationFromAddress(String strAddress){
         Geocoder coder = new Geocoder(getActivity());
         List<Address> address;
@@ -185,8 +248,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Search
         try {
             address = coder.getFromLocationName(strAddress,1);
             if (address.isEmpty()) {
-                System.out.println("address null");
-                return null;
+                return new LatLng(0, 0);
             }else {
                 Address location = address.get(0);
                 location.getLatitude();

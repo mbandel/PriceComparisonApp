@@ -8,7 +8,7 @@
     android:layout_marginTop="10dp"
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
-    android:background="@drawable/blue_border">
+    android:background="@drawable/bottom_line">
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -17,47 +17,56 @@
         android:elevation="4dp"
         android:gravity="center"
         android:orientation="horizontal"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
         app:layout_constraintTop_toTopOf="parent"
         >
+
+        <ImageView
+            android:id="@+id/category_icon"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".1"
+
+            />
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Snickers"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:layout_weight=".5"
+            android:textAlignment="center"
+            />
+
+
+        <TextView
+            android:id="@+id/amount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight=".15"
+            android:text="1"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textAlignment="center"
+            />
+
 
         <TextView
             android:id="@+id/price"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="3.50 "
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:layout_weight=".15"
-            android:textAlignment="center"
-            />
-
-        <TextView
-            android:id="@+id/shop"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight=".4"
-            android:text="Biedronka"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textAlignment="center"
-            />
-
-
-        <TextView
-            android:id="@+id/rating"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight=".15"
+            android:layout_weight=".2"
             android:text="0"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textAlignment="center"
             />
 
         <ImageView
-            android:id="@+id/more_info"
+            android:id="@+id/delete"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_more"
+            android:src="@drawable/ic_delete"
             android:layout_weight=".1"
             />
 

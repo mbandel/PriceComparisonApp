@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +33,8 @@ import com.pc.model.User;
 import com.pc.retrofit.Connector;
 import com.pc.util.MenuNavigation;
 import com.pc.util.NavigationAddPoster;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -107,6 +110,7 @@ public class AddPosterActivity extends AppCompatActivity implements NavigationAd
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, summaryFragment).commit();
     }
 
+
     @Override
     public void addPoster(Poster posterData) {
         posterData.setUser(new User(userId));
@@ -122,7 +126,7 @@ public class AddPosterActivity extends AppCompatActivity implements NavigationAd
             }
 
             @Override
-            public void onFailure(Call call, Throwable t) {
+            public void onFailure(@NotNull Call call, Throwable t) {
                 Toast.makeText(getApplicationContext(), getString(R.string.server_error), Toast.LENGTH_SHORT).show();
             }
         });
@@ -152,17 +156,16 @@ public class AddPosterActivity extends AppCompatActivity implements NavigationAd
         Call<List<Store>> storeCall = connector.serverApi.getStores(token);
         storeCall.enqueue(new Callback<List<Store>>() {
             @Override
-            public void onResponse(Call<List<Store>> call, Response<List<Store>> response) {
-                if(response.isSuccessful()){
+            public void onResponse(@NotNull Call<List<Store>> call, @NotNull Response<List<Store>> response) {
+                if(response.isSuccessful()) {
                     stores = response.body();
                     storeFragment = new StoreFragment(stores, poster);
                     storeMapFragment = new StoreMapFragment(stores, poster);
                 }
-                System.out.println("Response Code: " + response.code());
             }
 
             @Override
-            public void onFailure(Call<List<Store>> call, Throwable t) {
+            public void onFailure(@NotNull Call<List<Store>> call, Throwable t) {
             }
         });
     }
@@ -172,7 +175,6 @@ public class AddPosterActivity extends AppCompatActivity implements NavigationAd
         dialog.setContentView(R.layout.popup_dialog);
         TextView titleTV = dialog.findViewById(R.id.title);
         titleTV.setText(title);
-
         MaterialButton back_button = dialog.findViewById(R.id.back_btn);
         back_button.setOnClickListener(view -> {
             dialog.dismiss();
