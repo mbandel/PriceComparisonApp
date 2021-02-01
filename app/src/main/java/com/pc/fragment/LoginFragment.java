@@ -94,9 +94,7 @@ public class LoginFragment extends Fragment implements Validator.ValidationListe
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_login, container, false);
-
         ButterKnife.bind(this, view);
         email.addTextChangedListener(this);
         password.addTextChangedListener(this);
@@ -141,7 +139,7 @@ public class LoginFragment extends Fragment implements Validator.ValidationListe
     }
 
     public void findUserByEmail(String token, String email){
-        Call<User> findUserCall = connector.serverApi.findUserByEmail(token, email);
+        Call<User> findUserCall = connector.serverApi.findUserByEmail(email);
         findUserCall.enqueue(new Callback<User>() {
             @Override
             public void onResponse(@NotNull Call<User> call, @NotNull retrofit2.Response<User> response) {

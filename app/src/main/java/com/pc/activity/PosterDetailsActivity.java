@@ -8,31 +8,43 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.share.Share;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.pc.PriceComparison;
 import com.pc.R;
 import com.pc.adapter.CommentAdapter;
+import com.pc.fragment.AddPromotionFragment;
+import com.pc.fragment.AddToListFragment;
 import com.pc.model.Comment;
 import com.pc.model.Poster;
 import com.pc.model.Rating;
+import com.pc.model.ShoppingList;
 import com.pc.model.User;
 import com.pc.retrofit.Connector;
+import com.pc.util.AddToListDialog;
 import com.pc.util.MenuNavigation;
+import com.pc.util.NavigationAddPromotion;
+import com.pc.util.NavigationAddToList;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,7 +53,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class PosterDetailsActivity extends AppCompatActivity {
+public class PosterDetailsActivity extends AppCompatActivity implements NavigationAddToList, NavigationAddPromotion {
 
     @BindView(R.id.nav_view)
     NavigationView navigationView;
@@ -49,10 +61,16 @@ public class PosterDetailsActivity extends AppCompatActivity {
     Toolbar toolbar;
     @BindView(R.id.drawer_layout)
     DrawerLayout drawer;
+    @BindView(R.id.fragment_container)
+    FrameLayout fragmentContainer;
     @BindView(R.id.product_title)
     TextView title;
     @BindView(R.id.price_value)
     TextView price;
+    @BindView(R.id.discount_value)
+    TextView discountValue;
+    @BindView(R.id.discount)
+    ImageView discount;
     @BindView(R.id.store_name_value)
     TextView storeName;
     @BindView(R.id.store_address_value)
@@ -69,6 +87,8 @@ public class PosterDetailsActivity extends AppCompatActivity {
     TextView content;
     @BindView(R.id.send_btn)
     MaterialButton sendButton;
+    @BindView(R.id.add_to_list)
+    FloatingActionButton addToListButton;
 
     private int posterId;
     private int userId;
@@ -78,7 +98,9 @@ public class PosterDetailsActivity extends AppCompatActivity {
     private boolean isRated;
     private int currentRatingValue;
     private int ratingId;
-
+    private List<ShoppingList> shoppingLists;
+    private ShoppingList selectedShoppingList;
+    private Poster poster;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,16 +127,68 @@ public class PosterDetailsActivity extends AppCompatActivity {
         getRating();
     }
 
-    public void fillData(Poster poster){
+    @Override
+    public void addToList() {
+        if (selectedShoppingList == null){
+            Toast.makeText(getApplicationContext(), "Nie wybrałeś listy zakupów", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            Call<String> addPosterCall = connector.serverApi.addPosterToShoppingList(token, selectedShoppingList.getId(), poster);
+            addPosterCall.enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(Call<String> call, Response<String> response) {
+                    if (response.isSuccessful()) {
+                        PriceComparison.createSnackbar(drawer, getString(R.string.added_to_shopping_list)).show();
+                        selectedShoppingList = null;
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<String> call, Throwable t) {
+                    PriceComparison.createSnackbar(drawer, getString(R.string.server_error)).show();
+                }
+            });
+        }
+    }
+
+    @Override
+    public void selectList(ShoppingList shoppingList) {
+        selectedShoppingList = shoppingList;
+    }
+
+    @Override
+    public void addPromotion(Poster poster) {
+        Call<String> addPromotionCall = connector.serverApi.addPromotion(token, posterId, poster);
+        addPromotionCall.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                PriceComparison.createSnackbar(drawer, "Dodano promocję").show();
+                fragmentContainer.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                PriceComparison.createSnackbar(drawer, getString(R.string.server_error)).show();
+            }
+        });
+    }
+
+    @Override
+    public void exit() {
+        fragmentContainer.setVisibility(View.GONE);
+        selectedShoppingList = null;
+    }
+
+    public void fillData(Poster poster) {
         title.setText(poster.getProduct().getName());
         price.setText(poster.getPrice().toString());
         storeName.setText(poster.getStore().getName());
         storeAddress.setText(poster.getStore().getAddress());
-        price.setText(String.format("%.2f", poster.getPrice()) + " zł");
+        price.setText(String.format(Locale.ENGLISH, "%.2f zł", poster.getPrice()));
         rating.setText(String.valueOf(poster.getRatingValue()));
-        if (poster.getRatingValue() > 0){
+        if (poster.getRatingValue() > 0) {
             rating.setTextColor(getColor(R.color.colorGreen));
-        }else if (poster.getRatingValue() < 0) {
+        } else if (poster.getRatingValue() < 0) {
             rating.setTextColor(getColor(R.color.colorRed));
         }
         like.setOnClickListener(view -> {
@@ -122,26 +196,50 @@ public class PosterDetailsActivity extends AppCompatActivity {
                 like.setEnabled(false);
                 addRating(1);
                 getCommentsByPosterId(posterId);
-                System.out.println("add rating");
-            }
-            else if (isRated && currentRatingValue == -1) {
+            } else if (isRated && currentRatingValue == -1) {
                 dislike.setEnabled(false);
                 editRating(1);
-                System.out.println("edit rating");
             }
         });
         dislike.setOnClickListener(view -> {
             if (!isRated) {
                 dislike.setBackground(getDrawable(R.drawable.orange_border));
                 addRating(-1);
-                System.out.println("add rating");
-            }
-            else if (isRated && currentRatingValue == 1) {
-                System.out.println("edit rating");
+            } else if (isRated && currentRatingValue == 1) {
                 editRating(-1);
             }
         });
+
+
+        if (poster.getPromotionDate() == null && poster.getPromotionPrice() == null) {
+            discount.setImageResource(R.drawable.ic_discount);
+            discount.setOnClickListener(view -> {
+                AddPromotionFragment fragment = new AddPromotionFragment(posterId, poster.getPrice());
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, fragment)
+                        .commit();
+                fragmentContainer.setVisibility(View.VISIBLE);
+            });
+        } else {
+            if (PriceComparison.isFutureDate(poster.getPromotionDate())) {
+                price.setPaintFlags(price.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                discountValue.setText(String.format(Locale.ENGLISH, "%.2f zł ważne do:\n%s", poster.getPromotionPrice(), poster.getPromotionDate()));
+            } else {
+                discount.setImageResource(R.drawable.ic_discount);
+                discount.setOnClickListener(view -> {
+                    AddPromotionFragment fragment = new AddPromotionFragment(posterId, poster.getPrice());
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment_container, fragment)
+                            .commit();
+                    fragmentContainer.setVisibility(View.VISIBLE);
+                });
+            }
+        }
+
     }
+
 
     public void getPosterById(int id){
         Call<Poster> posterCall = connector.serverApi.getPosterById(token, id);
@@ -150,6 +248,8 @@ public class PosterDetailsActivity extends AppCompatActivity {
             public void onResponse(Call<Poster> call, Response<Poster> response) {
                 if (response.isSuccessful()){
                     fillData(response.body());
+                    poster = response.body();
+                    getShoppingLists();
                 } else {
                     Toast.makeText(getApplicationContext(), "Nie ma takiego ogłoszenia", Toast.LENGTH_SHORT).show();
                 }
@@ -157,7 +257,7 @@ public class PosterDetailsActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<Poster> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_SHORT).show();
+                PriceComparison.createSnackbar(drawer, getString(R.string.server_error)).show();
                 sendButton.setEnabled(false);
             }
         });
@@ -231,7 +331,7 @@ public class PosterDetailsActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<String> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_SHORT).show();
+                PriceComparison.createSnackbar(drawer, getString(R.string.server_error)).show();
             }
         });
     }
@@ -242,7 +342,7 @@ public class PosterDetailsActivity extends AppCompatActivity {
         editRatingCall.enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
-                System.out.println("PUT: "+ response.body());
+
                 if(response.isSuccessful()) {
                    setButtonBackground(value);
                    getPosterById(posterId);
@@ -251,7 +351,7 @@ public class PosterDetailsActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<String> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_SHORT).show();
+                PriceComparison.createSnackbar(drawer, getString(R.string.server_error)).show();
             }
         });
     }
@@ -289,30 +389,72 @@ public class PosterDetailsActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
                 if(response.isSuccessful()){
-                    Toast.makeText(getApplicationContext(), "Dodano komentarz", Toast.LENGTH_SHORT).show();
+                    PriceComparison.createSnackbar(drawer, "Dodano komentarz").show();
                     sendButton.setEnabled(true);
                     runOnUiThread(() -> {
                         getCommentsByPosterId(posterId);
                     });
                 }
                 else {
-                    Toast.makeText(getApplicationContext(), "Już dodałeś 1 komentarz", Toast.LENGTH_SHORT).show();
+                    PriceComparison.createSnackbar(drawer, "Już dodałeś 1 komentarz").show();
                     sendButton.setEnabled(true);
                 }
             }
 
             @Override
             public void onFailure(Call<String> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_SHORT).show();
+                PriceComparison.createSnackbar(drawer, getString(R.string.server_error)).show();
                 sendButton.setEnabled(true);
             }
         });
+    }
+
+    public void getShoppingLists() {
+        Call<List<ShoppingList>> shoppingListsCall = connector.serverApi.getShoppingListsByUserId(token, userId);
+        shoppingLists = new ArrayList<>();
+        shoppingListsCall.enqueue(new Callback<List<ShoppingList>>() {
+            @Override
+            public void onResponse(Call<List<ShoppingList>> call, Response<List<ShoppingList>> response) {
+                if (response.isSuccessful()){
+                    if (!response.body().isEmpty()) {
+                        for (ShoppingList shoppingList : response.body()) {
+                            if (shoppingList.getStore().getId() == poster.getStore().getId()) {
+                                shoppingLists.add(shoppingList);
+                            }
+                        }
+                        if (shoppingLists.isEmpty()) {
+                            addToListButton.setVisibility(View.GONE);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ShoppingList>> call, Throwable t) {
+
+            }
+        });
+
     }
 
     @OnClick(R.id.send_btn)
     public void onSendButtonClick(){
         sendButton.setEnabled(false);
         addComment(posterId, sharedPreferences.getInt("id", 0));
+    }
+
+    @OnClick(R.id.add_to_list)
+    public void onAddToListClick() {
+        if (!shoppingLists.isEmpty()) {
+            AddToListFragment fragment = new AddToListFragment(shoppingLists);
+            getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit();
+            fragmentContainer.setVisibility(View.VISIBLE);
+        } else {
+            PriceComparison.createSnackbar(drawer, getString(R.string.no_shopping_list)).show();
+        }
     }
 
 }

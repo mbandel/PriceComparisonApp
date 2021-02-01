@@ -25,6 +25,7 @@ import com.pc.util.NavigationAddShoppingList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -83,6 +84,10 @@ public class AddShoppingListActivity extends AppCompatActivity implements Naviga
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, addShoppingListFragment)
                 .commit();
+        sharedPreferences.edit()
+                .putBoolean("setStore", true)
+                .putString("storeName", String.format("%s %s", store.getName(), store.getAddress()))
+                .apply();
     }
 
 
@@ -92,7 +97,12 @@ public class AddShoppingListActivity extends AppCompatActivity implements Naviga
         addShoppingListCall.enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
-                PriceComparison.createSnackbar(drawer, getString(R.string.shopping_list_added)).show();
+                if (response.code() == 200) {
+                    PriceComparison.createSnackbar(drawer, getString(R.string.shopping_list_added)).show();
+                }
+                else {
+                    PriceComparison.createSnackbar(drawer, getString(R.string.shopping_list_exists)).show();
+                }
             }
 
             @Override

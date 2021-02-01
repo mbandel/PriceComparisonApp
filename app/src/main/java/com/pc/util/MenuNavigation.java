@@ -7,9 +7,12 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 
 import com.google.android.material.navigation.NavigationView;
+import com.pc.PriceComparison;
 import com.pc.R;
 import com.pc.activity.AddPosterActivity;
 import com.pc.activity.MainActivity;
+import com.pc.activity.ProfileActivity;
+import com.pc.activity.PromotionActivity;
 import com.pc.activity.ShoppingListActivity;
 
 public class MenuNavigation implements NavigationView.OnNavigationItemSelectedListener {
@@ -30,9 +33,16 @@ public class MenuNavigation implements NavigationView.OnNavigationItemSelectedLi
                 activity.startActivity(new Intent(activity.getApplicationContext(), AddPosterActivity.class));
                 break;
             case (R.id.nav_promotion):
+                activity.startActivity(new Intent(activity.getApplicationContext(), PromotionActivity.class));
                 break;
             case (R.id.nav_shopping):
                 activity.startActivity(new Intent(activity.getApplicationContext(), ShoppingListActivity.class));
+                break;
+            case (R.id.nav_profile):
+                activity.startActivity(new Intent(activity.getApplicationContext(), ProfileActivity.class));
+                break;
+            case (R.id.nav_logout):
+                PriceComparison.signOut(activity);
                 break;
         }
         return true;

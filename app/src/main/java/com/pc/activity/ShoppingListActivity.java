@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -32,6 +33,7 @@ import com.pc.model.Poster;
 import com.pc.model.ShoppingList;
 import com.pc.retrofit.Connector;
 import com.pc.util.MenuNavigation;
+import com.pc.util.NavigationShoppingList;
 
 import java.util.List;
 import java.util.Locale;
@@ -40,7 +42,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import retrofit2.Response;
 
-public class ShoppingListActivity extends AppCompatActivity {
+public class ShoppingListActivity extends AppCompatActivity implements NavigationShoppingList {
 
     @BindView(R.id.nav_view)
     NavigationView navigationView;
@@ -100,7 +102,6 @@ public class ShoppingListActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
-
     }
 
     @OnClick({R.id.expand_text, R.id.expand_btn})
@@ -116,6 +117,10 @@ public class ShoppingListActivity extends AppCompatActivity {
         }
     }
 
+    @OnClick(R.id.add_btn)
+    public void onAddButtonClick() {
+        startActivity(new Intent(getApplicationContext(), AddShoppingListActivity.class));
+    }
 
     private void getShoppingLists() {
         Call<List<ShoppingList>> shoppingListCall = connector.serverApi.getShoppingListsByUserId(token, sharedPreferences.getInt("id" ,-1));
@@ -126,8 +131,9 @@ public class ShoppingListActivity extends AppCompatActivity {
                     shoppingLists = response.body();
                     if (!shoppingLists.isEmpty()) {
                         fillData(response.body().get(0));
+                        setShoppingListAdapter(shoppingLists);
                     }
-                    setShoppingListAdapter(shoppingLists);
+
                 }
             }
 
@@ -140,7 +146,7 @@ public class ShoppingListActivity extends AppCompatActivity {
 
 
     private void fillData(ShoppingList shoppingList) {
-        ShoppingListAdapter shoppingListAdapter = new ShoppingListAdapter(this, shoppingList.getPosters());
+        ShoppingListAdapter shoppingListAdapter = new ShoppingListAdapter(this, shoppingList.getPosters(), shoppingList.getId());
         recyclerView.setAdapter(shoppingListAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         storeName.setText(String.format("%s\n%s", shoppingList.getStore().getName(), shoppingList.getStore().getAddress()));
@@ -167,4 +173,8 @@ public class ShoppingListActivity extends AppCompatActivity {
         shoppingListSpinner.setOnItemClickListener((AdapterView<?> adapterView, View view, int i, long l) -> fillData(shoppingLists.get(i)));
     }
 
+    @Override
+    public void refresh() {
+        getShoppingLists();
+    }
 }

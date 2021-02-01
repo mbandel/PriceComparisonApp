@@ -143,7 +143,6 @@ public class AddPosterActivity extends AppCompatActivity implements NavigationAd
                     productPriceFragment = new ProductPriceFragment(products, poster);
                     goToProduct();
                 }
-                System.out.println("Response Code: " + response.code());
             }
             @Override
             public void onFailure(Call<List<Product>> call, Throwable t) {

@@ -45,13 +45,10 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         holder.name.setText(category.getName());
         holder.icon.setImageResource(IconManager.setIcon(category.getName()));
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(activity.getApplicationContext(), ProductActivity.class);
-                intent.putExtra("id", category.getId());
-                activity.startActivity(intent);
-            }
+        holder.itemView.setOnClickListener(view -> {
+            Intent intent = new Intent(activity.getApplicationContext(), ProductActivity.class);
+            intent.putExtra("id", category.getId());
+            activity.startActivity(intent);
         });
     }
 

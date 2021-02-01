@@ -122,20 +122,9 @@ public class ProductPriceFragment extends Fragment {
         for (Product product : products){
             if (product.getName().equals(findProduct.getText().toString())){
                 poster.setProduct(product);
-                System.out.println("Product set");
             }
         }
 
     }
-//        DecimalFormat decimalFormat = new DecimalFormat("#.00");
-//        double price = Double.parseDouble(priceEditText.getText().toString());
-//        int decimalLength = decimalFormat.format(price).length()-1;
-//        if(decimalLength == 2)
-//            return true;
-//        else{
-//            Toast.makeText(getContext(), "Niepoprawna cena", Toast.LENGTH_SHORT).show();
-//        }
-//        return false;
-
 
 }

@@ -7,6 +7,7 @@ public class Store {
     private String address;
 
     public Store(){}
+
     public Store(int id){
         this.id = id;
     }

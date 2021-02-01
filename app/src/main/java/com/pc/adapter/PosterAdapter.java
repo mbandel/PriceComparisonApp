@@ -12,12 +12,16 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.pc.PriceComparison;
 import com.pc.R;
 import com.pc.activity.PosterDetailsActivity;
 import com.pc.model.Poster;
 
 import org.w3c.dom.Text;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindDimen;
@@ -46,20 +50,23 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Poster poster = posters.get(position);
-        holder.price.setText(String.format("%.2f", poster.getPrice()) + " zł");
+        if (poster.getPromotionPrice() != null && poster.getPromotionDate() != null) {
+            if (PriceComparison.isFutureDate(poster.getPromotionDate())) {
+                holder.discount.setImageResource(R.drawable.ic_discount);
+                holder.price.setText(String.format("%.2f zł", poster.getPromotionPrice()));
+            }
+        }
+        holder.price.setText(String.format("%.2f zł", poster.getPrice()));
         holder.shop.setText(poster.getStore().getName());
         if (poster.getRatingValue() > 0)
             holder.rating.setTextColor(activity.getColor(R.color.colorGreen));
         else if (poster.getRatingValue() < 0)
             holder.rating.setTextColor(activity.getColor(R.color.colorRed));
         holder.rating.setText(String.valueOf(poster.getRatingValue()));
-        holder.moreInfo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(activity.getApplicationContext(), PosterDetailsActivity.class);
-                intent.putExtra("id", poster.getId());
-                activity.startActivity(intent);
-            }
+        holder.moreInfo.setOnClickListener(view -> {
+            Intent intent = new Intent(activity.getApplicationContext(), PosterDetailsActivity.class);
+            intent.putExtra("id", poster.getId());
+            activity.startActivity(intent);
         });
     }
 
@@ -68,12 +75,14 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.ViewHolder
         return posters.size();
     }
 
+
     static class ViewHolder extends RecyclerView.ViewHolder{
+        @BindView(R.id.discount)
+        ImageView discount;
         @BindView(R.id.price)
         TextView price;
         @BindView(R.id.shop)
         TextView shop;
-
         @BindView(R.id.more_info)
         ImageView moreInfo;
         @BindView(R.id.rating)

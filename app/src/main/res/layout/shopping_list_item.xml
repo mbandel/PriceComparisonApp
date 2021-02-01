@@ -6,15 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="10dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
+
     android:background="@drawable/bottom_line">
 
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="4dp"
         android:gravity="center"
         android:orientation="horizontal"
         android:paddingTop="16dp"
@@ -26,7 +24,7 @@
             android:id="@+id/category_icon"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight=".1"
+            android:layout_weight=".12"
 
             />
 
@@ -36,8 +34,8 @@
             android:layout_height="wrap_content"
             android:text="Snickers"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:layout_weight=".5"
-            android:textAlignment="center"
+            android:layout_weight=".4"
+            android:textAlignment="textStart"
             />
 
 
@@ -48,7 +46,7 @@
             android:layout_weight=".15"
             android:text="1"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textAlignment="center"
+            android:textAlignment="textStart"
             />
 
 
@@ -59,7 +57,7 @@
             android:layout_weight=".2"
             android:text="0"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textAlignment="center"
+            android:textAlignment="textStart"
             />
 
         <ImageView

@@ -1,5 +1,7 @@
 package com.pc.model;
 
+import androidx.annotation.Nullable;
+
 public class Poster {
 
     private int id;
@@ -9,6 +11,8 @@ public class Poster {
     private User user;
     private Store store;
     private int ratingValue;
+    private Double promotionPrice;
+    private String promotionDate;
 
     public Poster(){
         ratingValue = 0;
@@ -17,6 +21,11 @@ public class Poster {
     public Poster(int id){
         this.id = id;
         ratingValue = 0;
+    }
+
+    public Poster(Double promotionPrice, String promotionDate){
+        this.promotionPrice = promotionPrice;
+        this.promotionDate = promotionDate;
     }
 
     public Poster (int id, Product product, Double price, String date, User user, Store store){
@@ -81,4 +90,22 @@ public class Poster {
         this.ratingValue = ratingValue;
     }
 
+    public Double getPromotionPrice() {
+        return promotionPrice;
+    }
+
+    public String getPromotionDate() {
+        return promotionDate;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        Poster poster;
+        if (!(obj instanceof Poster)) {
+            return false;
+        } else {
+            poster = (Poster) obj;
+            return this.id == poster.getId();
+        }
+    }
 }

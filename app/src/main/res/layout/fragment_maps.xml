@@ -171,7 +171,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@drawable/green_bg"
-            android:text="Wiecej"
+            android:text="Więcej"
             android:textColor="@color/colorWhite"
             android:textSize="18sp"
             android:layout_marginTop="24dp"

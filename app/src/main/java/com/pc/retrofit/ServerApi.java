@@ -24,10 +24,13 @@ import retrofit2.http.Path;
 public interface ServerApi {
 
     @GET("user/email/{email}")
-    public Call<User> findUserByEmail(@Header("Authorization") String token, @Path("email") String email);
+    public Call<User> findUserByEmail(@Path("email") String email);
 
-    @GET("user/username{username}")
+    @GET("user/username/{username}")
     public Call<User> findUserByUsername(@Path("username") String username);
+
+    @GET("user/{id}")
+    public Call<User> findUserById(@Header("Authorization") String token, @Path("id") int id);
 
     @GET("categories")
     public Call<List<Category>> getCategories(@Header("Authorization") String token);
@@ -37,6 +40,9 @@ public interface ServerApi {
 
     @GET("products/category/{id}")
     public Call<List<Product>> getProductsByCategoryId(@Header("Authorization") String token, @Path("id") int id);
+
+    @GET("posters")
+    public Call<List<Poster>> getAllPosters();
 
     @GET("posters/product/{id}")
     public Call<List<Poster>> getPostersByProductId(@Header("Authorization") String token, @Path("id") int id);
@@ -62,11 +68,23 @@ public interface ServerApi {
     @GET("shoppingList/{id}/posters")
     public Call<List<Poster>> getPostersByShoppingList(@Header("Authorization") String token, @Path("id") int id);
 
-    @POST("rating")
-    public Call<String> addRating(@Header("Authorization") String token, @Body Rating rating);
+    @PUT("shoppingList/{id}/addPoster")
+    public Call<String> addPosterToShoppingList(@Header("Authorization") String token, @Path("id") int id, @Body Poster poster);
+
+    @PUT("shoppingList/{id}/removePoster")
+    public Call<String> removePosterFromShoppingList(@Header("Authorization") String token, @Path("id") int id, @Body Poster poster);
 
     @PUT("rating/{id}")
     public Call<String> editRating(@Header("Authorization") String token, @Path("id") int id, @Body Rating rating);
+
+    @PUT("poster/{id}/addPromotion")
+    public Call<String> addPromotion(@Header("Authorization") String token, @Path("id") int id, @Body Poster poster);
+
+    @PUT("user/{id}")
+    public Call<String> editUser(@Header("Authorization") String token, @Path("id") int id, @Body User user);
+
+    @POST("rating")
+    public Call<String> addRating(@Header("Authorization") String token, @Body Rating rating);
 
     @POST("authenticate")
     public Call<Token> authenticate(@Body Credentials credentials);

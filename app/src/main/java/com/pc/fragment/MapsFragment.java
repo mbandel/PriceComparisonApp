@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -104,12 +103,16 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Search
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
     public void onPause() {
 
-        MapStateManager mgr = new MapStateManager(requireContext());
-        mgr.saveMapState(googleMap);
         super.onPause();
     }
+
 
     @Override
     public void onStop() {
@@ -125,7 +128,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Search
 
     @Override
     public void onResume() {
-        this.setRetainInstance(true);
         super.onResume();
     }
 
@@ -133,20 +135,21 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Search
     @Override
     public void onMapReady(GoogleMap google){
         googleMap = google;
-        ClusteringSettings clusteringSettings = new ClusteringSettings().addMarkersDynamically(true).clusterSize(52);
+        LatLng lodz = new LatLng(51.759446, 19.457217);
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lodz, 12));
+        ClusteringSettings clusteringSettings = new ClusteringSettings().addMarkersDynamically(false).clusterSize(52);
         googleMap.setClustering(clusteringSettings);
-        searchView.setOnQueryTextListener(this);
 
-        MapStateManager mgr = new MapStateManager(getContext());
-        CameraPosition position = mgr.getSavedCameraPosition();
-        if (position != null) {
-            CameraUpdate update = CameraUpdateFactory.newCameraPosition(position);
-            googleMap.moveCamera(update);
-            googleMap.setMapType(mgr.getSavedMapType());
-        }else {
-            LatLng lodz = new LatLng(51.759445, 19.457216);
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lodz, 12));
-        }
+
+//        MapStateManager mgr = new MapStateManager(getContext());
+//        CameraPosition position = mgr.getSavedCameraPosition();
+//        if (position != null) {
+//            CameraUpdate update = CameraUpdateFactory.newCameraPosition(position);
+//            googleMap.moveCamera(update);
+//            googleMap.setMapType(mgr.getSavedMapType());
+//        }else {
+
+//        }
         for (Poster poster: posters) {
             LatLng location = getLocationFromAddress(poster.getStore().getAddress());
             int icon = setIcon(poster);
@@ -173,6 +176,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Search
             }
             return false;
         });
+
+        searchView.setOnQueryTextListener(this);
         progressLayout.setVisibility(View.INVISIBLE);
     }
 
@@ -184,7 +189,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Search
 //        }
 //        Timber.e("New poster list size: " + newPosterList.size());
 //        navigation.editPosterList(newPosterList);
-        System.out.println("MapsFragment onDetach()");
+
         super.onDetach();
     }
 
@@ -260,4 +265,5 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Search
         }
         return latLng;
     }
+
 }

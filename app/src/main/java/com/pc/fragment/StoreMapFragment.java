@@ -91,6 +91,8 @@ public class StoreMapFragment extends Fragment implements OnMapReadyCallback{
 
     @Override
     public void onMapReady(GoogleMap googleMap){
+        LatLng lodz = new LatLng(51.759445, 19.457216);
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lodz, 12));
         ClusteringSettings clusteringSettings = new ClusteringSettings().addMarkersDynamically(true).clusterSize(52);
         googleMap.setClustering(clusteringSettings);
 
@@ -103,8 +105,6 @@ public class StoreMapFragment extends Fragment implements OnMapReadyCallback{
                     .setData(store);
         }
 
-        LatLng lodz = new LatLng(51.759445, 19.457216);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lodz, 12));
 
         googleMap.setOnMarkerClickListener(marker -> {
             if(!marker.isCluster()){
@@ -113,9 +113,9 @@ public class StoreMapFragment extends Fragment implements OnMapReadyCallback{
                 storeName.setText(store.getName());
                 storeAddress.setText(store.getAddress());
                 selectButton.setOnClickListener(view -> {
-                   poster.setStore(store);
                    switch (navigationType) {
                        case ADD_POSTER:
+                           poster.setStore(store);
                            navigationAddPoster.goToSummary();
                            break;
                        case ADD_SHOPPING_LIST:

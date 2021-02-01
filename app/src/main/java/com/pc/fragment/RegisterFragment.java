@@ -73,6 +73,8 @@ public class RegisterFragment extends Fragment implements Validator.ValidationLi
     private boolean isInputValid;
     private Validator validator;
     private Connector connector;
+    boolean usernameValid;
+    boolean emailValid;
 
     public RegisterFragment() {
         // Required empty public constructor
@@ -88,6 +90,7 @@ public class RegisterFragment extends Fragment implements Validator.ValidationLi
         super.onCreate(savedInstanceState);
         validator = new Validator(this);
         validator.setValidationListener(this);
+        connector = Connector.getInstance();
     }
 
     @Override
@@ -111,26 +114,7 @@ public class RegisterFragment extends Fragment implements Validator.ValidationLi
         validator.validate();
         if(isInputValid){
             progressLayout.setVisibility(View.VISIBLE);
-            connector = Connector.getInstance();
-            User user = new User(firstName.getText().toString(), lastName.getText().toString(), username.getText().toString(), email.getText().toString(), password.getText().toString());
-            Call<String> registerCall = connector.serverApi.createUser(user);
-            registerCall.enqueue(new Callback<String>() {
-                @Override
-                public void onResponse(Call<String> call, Response<String> response) {
-                    if (response.isSuccessful()) {
-                        Toast.makeText(getActivity().getApplicationContext(), "rejestracja zakończona sukcesem", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(getActivity().getApplicationContext(), "rejestracja zakończona niepowodzeniem", Toast.LENGTH_SHORT).show();
-                    }
-                    progressLayout.setVisibility(View.INVISIBLE);
-                }
-
-                @Override
-                public void onFailure(Call<String> call, Throwable t) {
-                    Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_SHORT).show();
-                    progressLayout.setVisibility(View.INVISIBLE);
-                }
-            });
+            isEmailUsed();
         }
     }
 
@@ -165,11 +149,72 @@ public class RegisterFragment extends Fragment implements Validator.ValidationLi
     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
     @Override
-    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-    }
+    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
     @Override
     public void afterTextChanged(Editable editable) {
         validator.validate();
+    }
+
+    public void isUsernameUsed() {
+        Call<User> usernameCall = connector.serverApi.findUserByUsername(username.getText().toString());
+        usernameCall.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
+                    username.setError("Podana nazwa użytkownika jest zajęta");
+                    progressLayout.setVisibility(View.INVISIBLE);
+                } else {
+                    createUser();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                usernameValid = false;
+            }
+        });
+    }
+
+    public void isEmailUsed() {
+        Call<User> emailCall = connector.serverApi.findUserByEmail(email.getText().toString());
+        emailCall.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
+                    email.setError("Podany adres e-mail jest zajęty");
+                    progressLayout.setVisibility(View.INVISIBLE);
+                } else {
+                    isUsernameUsed();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                emailValid = false;
+            }
+        });
+    }
+
+    public void createUser() {
+        User user = new User(firstName.getText().toString(), lastName.getText().toString(), username.getText().toString(), email.getText().toString(), password.getText().toString());
+        Call<String> registerCall = connector.serverApi.createUser(user);
+        registerCall.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(getActivity().getApplicationContext(), "rejestracja zakończona sukcesem", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getActivity().getApplicationContext(), "rejestracja zakończona niepowodzeniem", Toast.LENGTH_SHORT).show();
+                }
+                progressLayout.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(getActivity().getApplicationContext(), getResources().getString(R.string.server_error), Toast.LENGTH_SHORT).show();
+                progressLayout.setVisibility(View.INVISIBLE);
+            }
+        });
     }
 }

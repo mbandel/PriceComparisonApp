@@ -31,6 +31,7 @@
     <string name="first_name_error">Imię powinno mieć 2–30 znaków, wyłącznie litery</string>
     <string name="last_name_error">Nazwisko powinno mieć 2–30 znaków, wyłącznie litery</string>
     <string name="username_error">Nazwa użytkownika powinna mieć 3–30 znaków</string>
+    <string name="shopping_list_error">Nazwa powinna mieć 3–30 znaków</string>
     <string name="server_error">Błąd połączenia z serwerem</string>
     <string name="list">Lista</string>
     <string name="map">Mapa</string>
@@ -55,6 +56,8 @@
     <string name="menu_add">Dodaj ogłoszenie</string>
     <string name="menu_promotions">Promocje</string>
     <string name="menu_shopping">Listy zakupów</string>
+    <string name="menu_profile">Edytuj profil</string>
+    <string name="logout">Wyloguj</string>
     <string name="product">Produkt:</string>
     <string name="sum">Suma: </string>
     <string name="poster_added">Ogłoszenie dodane pomyślnie</string>
@@ -68,4 +71,14 @@
     <string name="add_shoppinglist">Dodaj listę zakupów</string>
     <string name="add">Dodaj</string>
     <string name="shopping_list_added">Pomyślnie stworzono listę</string>
+    <string name="wrong_store_name">Niepoprawna nazwa sklepu</string>
+    <string name="shopping_list_exists">Posiadasz już listę zakupów o takiej nazwie</string>
+    <string name="no_shopping_list">Nie stworzyłeś jeszcze żadnej listy zakupów</string>
+    <string name="added_to_shopping_list">Dodano do listy zakupów</string>
+    <string name="title_activity_promotion">PromotionActivity</string>
+    <!--
+    This string is used for square devices and overridden by hello_world in
+    values-round/strings.xml for round devices.
+    -->
+    <string name="hello_world">Hello Square World!</string>
 </resources>

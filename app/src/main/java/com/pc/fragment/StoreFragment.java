@@ -11,9 +11,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
+import com.pc.PriceComparison;
 import com.pc.R;
 import com.pc.model.Poster;
 import com.pc.model.Store;
@@ -28,6 +30,8 @@ import butterknife.OnClick;
 
 public class StoreFragment extends Fragment {
 
+    @BindView(R.id.constraint_layout)
+    ConstraintLayout constraintLayout;
     @BindView(R.id.next_btn)
     MaterialButton nextButton;
     @BindView(R.id.find_store)
@@ -100,7 +104,7 @@ public class StoreFragment extends Fragment {
         if(storeList.contains(findStore.getText().toString())){
             return true;
         } else {
-            Toast.makeText(getContext(), "Niepoprawna nazwa sklepu", Toast.LENGTH_SHORT).show();
+            PriceComparison.createSnackbar(constraintLayout, getContext().getString(R.string.wrong_store_name)).show();
             return false;
         }
     }

@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.navigation.NavigationView;
+import com.pc.PriceComparison;
 import com.pc.R;
 import com.pc.adapter.CategoryAdapter;
 import com.pc.model.Category;
@@ -25,6 +26,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -74,21 +77,20 @@ public class MainActivity extends AppCompatActivity{
     }
 
 
-    public void getCategories(){
+    public void getCategories() {
         Call<List<Category>> categoriesCall = connector.serverApi.getCategories(token);
         categoriesCall.enqueue(new Callback<List<Category>>() {
             @Override
-            public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
+            public void onResponse(@NotNull Call<List<Category>> call, @NotNull Response<List<Category>> response) {
                 if(response.isSuccessful()) {
                     List<Category> categories = response.body();
                     showCategoriesList(categories);
                 }
-                else
-                    Toast.makeText(getApplicationContext(), "code "+response.code(), Toast.LENGTH_SHORT).show();
             }
 
             @Override
-            public void onFailure(Call<List<Category>> call, Throwable t) {
+            public void onFailure(@NotNull Call<List<Category>> call, @NotNull Throwable t) {
+                PriceComparison.createSnackbar(drawer, getString(R.string.server_error)).show();
             }
         });
     }
@@ -100,33 +102,9 @@ public class MainActivity extends AppCompatActivity{
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
     }
 
-    public int setIcon(String iconType){
-        if (iconType.equals("słodycze"))
-            return R.drawable.ic_candy;
-        else if (iconType.equals("pieczywo"))
-            return R.drawable.ic_bread;
-        else if (iconType.equals("napoje"))
-            return R.drawable.ic_drinks;
-        else if (iconType.equals("warzywa"))
-            return R.drawable.ic_vegetable;
-        else if (iconType.equals("owoce"))
-            return R.drawable.ic_fruit;
-        else if (iconType.equals("przyprawy"))
-            return R.drawable.spices;
-        else if (iconType.equals("alkohole"))
-            return R.drawable.ic_alcohol;
-        else if (iconType.equals("nabiał"))
-            return R.drawable.ic_milk;
-        else if (iconType.equals("meat"))
-            return R.drawable.ic_meat;
-        else if (iconType.equals("ryby"))
-            return R.drawable.ic_fish;
-        else return R.drawable.green_bg;
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }

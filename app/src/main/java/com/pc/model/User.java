@@ -32,6 +32,23 @@ public class User implements Serializable {
         this.password = password;
     }
 
+    public User(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+    public User (String data, int option) {
+        switch (option) {
+            case 1 :
+               this.email = data;
+               break;
+            case 2 :
+                this.password = data;
+                break;
+        }
+    }
+
+
     public int getId() {
         return id;
     }

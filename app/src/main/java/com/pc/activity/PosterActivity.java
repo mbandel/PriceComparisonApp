@@ -25,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -83,6 +84,8 @@ public class PosterActivity extends AppCompatActivity implements NavigationView.
     Button sortButton;
     @BindView(R.id.filter_stores_btn)
     Button filterStoreButton;
+    @BindView(R.id.linear_layout)
+    LinearLayout linearLayout;
 
     private Connector connector;
     private SharedPreferences sharedPreferences;
@@ -121,7 +124,7 @@ public class PosterActivity extends AppCompatActivity implements NavigationView.
         productTitle.setText(getIntent().getExtras().getString("name"));
         getPostersByProductId(productId);
         getStores();
-        System.out.println("PosterActivity onCreate()");
+
     }
 
 
@@ -241,6 +244,7 @@ public class PosterActivity extends AppCompatActivity implements NavigationView.
                     productTitle.setVisibility(View.VISIBLE);
                     sortButton.setVisibility(View.VISIBLE);
                     filterStoreButton.setVisibility(View.VISIBLE);
+                    linearLayout.setVisibility(View.VISIBLE);
                     currentFragment = posterFragmentString;
                     getSupportFragmentManager()
                             .beginTransaction()
@@ -255,7 +259,7 @@ public class PosterActivity extends AppCompatActivity implements NavigationView.
                     filterStoreButton.setVisibility(View.GONE);
                     productTitle.setVisibility(View.GONE);
                     sortButton.setVisibility(View.GONE);
-                    PriceComparison.createSnackbar(findViewById(R.id.poster_layout), "Widoczne sklepy na mapie zaktualizują listę ogłoszeń").show();
+                    linearLayout.setVisibility(View.GONE);
                     break;
                 }
         }
